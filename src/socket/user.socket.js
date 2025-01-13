@@ -17,6 +17,10 @@ class UserSocketEventService {
   }
 
   async disconnection(socket) {
+    console.log("****************** DISCONNECT ******************");
+    console.log(socket?.apiUser);
+    console.log("****************** DISCONNECT ******************");
+    
     await userServiceInstance.update({
       uuid: socket?.apiUser?.uuid,
       isOnline: false,
