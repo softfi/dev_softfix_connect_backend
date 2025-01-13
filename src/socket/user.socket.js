@@ -25,6 +25,13 @@ class UserSocketEventService {
   }
 
   async sendConnectionRequest(socket, data) {
+
+    console.log("*********************");
+    console.log(socket.apiUser);
+    console.log("*********************");
+    console.log(data);
+    console.log("*********************");
+    
     let result = await connectionServiceInstance.sendConnectionReq({
       apiUser: socket.apiUser,
       toId: data.toUUID,
