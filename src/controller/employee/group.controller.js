@@ -66,7 +66,7 @@ export const employeeGroupLogs = tryCatch(async (req, res) => {
     count: Number(count) || 100,
     all: all ?? false,
   });
-  
+
   if (result.status) {
     const urlPrefix = `${req.protocol}://${req.headers.host}/public-uploads/`;
     return sendResponseOk(res, result.msg, {
@@ -98,12 +98,14 @@ export const employeeGroupLogDetails = tryCatch(async (req, res) => {
       result.data.file.path = urlPrefix + result?.data?.file?.path;
     }
 
-    result.data.seenBy = result.data.seenBy.map((item) => {
-      if (item?.user?.image) {
-        item.user.image.path = urlPrefix + item.user.image.path;
-      }
-      return item;
-    });
+    if (result.data?.seenBy) {
+      result.data.seenBy = result.data.seenBy.map((item) => {
+        if (item?.user?.image) {
+          item.user.image.path = urlPrefix + item.user.image.path;
+        }
+        return item;
+      });
+    }
     return sendResponseOk(res, result.msg, {
       data: result.data,
     });
