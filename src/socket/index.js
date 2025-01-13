@@ -84,6 +84,10 @@ const startSocket = tryCatch(async (app) => {
     socket.on("current-personal-chat-with-log", (data) =>
       userSocketServiceInstance.managePersonalMessageSeen(socket, data)
     );
+
+    socket.on("delete-personal-log", (data) =>
+      userSocketServiceInstance.deletePersonalMessage(socket, data)
+    );
   });
 });
 

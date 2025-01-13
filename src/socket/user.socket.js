@@ -206,6 +206,38 @@ class UserSocketEventService {
       socket.emit("personal-list-updated", { status: true, log: null });
     }
   }
+
+  async deletePersonalMessage(socket, data) {
+    let userInfo = await userServiceInstance.details({
+      uuid: socket.apiUser.uuid,
+    });
+    if (!userInfo.status) {
+      throw new Error("Invalid user id");
+    }
+
+    let toInfo = await userServiceInstance.details({ uuid: data.toUUID });
+    if (!toInfo.status) {
+      throw new Error("Invalid toUUID");
+    }
+
+    let deleteStatus = await personalServiceInstance.delete({
+      apiUser: socket.apiUser,
+      msgId: data.msgId,
+    });
+
+    if (deleteStatus.status) {
+      const dataToSend = {
+        status: true,
+        log: { msgId: data.msgId, toUser: toInfo.data },
+      };
+      socket.emit("self-message-delete-confirmation-for-personal", dataToSend);
+      if (toInfo?.socketId) {
+        socket
+          .to(toInfo.socketId)
+          .emit("delete-message-in-personal", dataToSend);
+      }
+    }
+  }
 }
 
 export default UserSocketEventService;

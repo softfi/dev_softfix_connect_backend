@@ -24,6 +24,7 @@ import {
 } from "../controller/employee/group.controller.js";
 import {
   employeePersonalLogDetails,
+  employeeSinglePersonalLogDetails,
   employeeUserDetails,
   // actionEmployeeConnectionRequest,
   // employeeSendConnection,
@@ -102,6 +103,11 @@ empAuthRoute.group("/user", (empAuthRoute) => {
       personalLogValidator_v,
       bodyValidator,
       employeePersonalLogDetails
+    );
+
+    empAuthRoute.get(
+      "/details/:id",
+      employeeSinglePersonalLogDetails
     );
   });
 });

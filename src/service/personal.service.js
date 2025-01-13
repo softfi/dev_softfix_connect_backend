@@ -217,6 +217,42 @@ class PersonalService {
     }
   }
 
+  async delete({ apiUser, msgId }) {
+    let checkMsg = await this.#personalLogs.getDetails({
+      where: {
+        id: msgId,
+      },
+    });
+
+    if (!checkMsg) {
+      return {
+        status: false,
+        msg: "Invalid msgId",
+      };
+    }
+
+    if (checkMsg?.fromId !== apiUser?.id) {
+      return {
+        status: false,
+        msg: "Only the person who sent the message can delete it!",
+      };
+    }
+
+    let updateStatus = await this.#personalLogs.update(
+      { id: msgId },
+      { isDeleted: true }
+    );
+
+    if (updateStatus) {
+      return {
+        status: true,
+        msg: "Personal log deleted successfully",
+      };
+    } else {
+      return { status: false, msg: "Personal log deletion failed" };
+    }
+  }
+
   // async getLogList({ apiUser, page, count, search, urlPrefix }) {
   //   const rawQuery = `SELECT PL.id, PL.fromId, PL.toId, PL.content, PL.type, PL.msgType, PL.createdAt, PL.seenAt, PL.connectionId, UF.uuid as fromUUID, UF.name as fromName, UF.email as fromEmail, UF.imageId as fromImageId, UT.uuid as toUUID, UT.name as toName, UT.email as toEmail,UT.imageId as toImageId FROM Personal_Logs PL LEFT JOIN User UF ON UF.id = PL.fromId LEFT JOIN User UT ON UT.id = PL.toId WHERE PL.isDeleted = 0 AND UF.isDeleted = 0 AND UT.isDeleted = 0 AND UF.id = ${
   //     apiUser.id

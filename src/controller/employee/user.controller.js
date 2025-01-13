@@ -183,3 +183,23 @@ export const employeePersonalLogDetails = tryCatch(async (req, res) => {
     return sendResponseBadReq(res, result.msg);
   }
 });
+
+export const employeeSinglePersonalLogDetails = tryCatch(async (req, res) => {
+  let { id } = req.params;
+
+  let result = await PersonalInstance.getSingleLogDetail({
+    logId: Number(id),
+  });
+
+  if (result.status) {
+    const urlPrefix = `${req.protocol}://${req.headers.host}/public-uploads/`;
+    if (result.data?.file && result.data.file?.path) {
+      result.data.file.path = urlPrefix + result.data.file.path;
+    }
+    return sendResponseOk(res, result.msg, {
+      data: result.data,
+    });
+  } else {
+    return sendResponseBadReq(res, result.msg);
+  }
+});
