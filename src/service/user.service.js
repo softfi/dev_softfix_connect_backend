@@ -343,6 +343,7 @@ class UserService {
   }
 
   async listWithConnectionStatus({
+    all,
     apiUser,
     page,
     count,
@@ -359,6 +360,13 @@ class UserService {
 
     if (role && role.length > 0) {
       filter.roleId = { in: role };
+    }
+
+    let paginationObj = {};
+
+    if (all !== true) {
+      paginationObj.skip = (page - 1) * count;
+      paginationObj.take = count;
     }
 
     let userList = await this.#user.get({
@@ -390,8 +398,7 @@ class UserService {
         : {
             createdAt: "desc",
           },
-      skip: (page - 1) * count,
-      take: count,
+      ...paginationObj,
     });
 
     let totalCount = await this.#user.count({

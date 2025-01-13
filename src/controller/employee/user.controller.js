@@ -14,7 +14,7 @@ const ConnectionServiceInstance = new ConnectionService();
 const PersonalInstance = new PersonalService();
 
 export const employeeUserList = tryCatch(async (req, res) => {
-  let { page, count, search } = req.body;
+  let { page, count, search, all } = req.body;
   const urlPrefix = `${req.protocol}://${req.headers.host}/public-uploads/`;
 
   let getRole = await EmpRoleInstance.list({});
@@ -24,6 +24,7 @@ export const employeeUserList = tryCatch(async (req, res) => {
     .map((e) => e.id);
 
   let result = await EmpUserInstance.listWithConnectionStatus({
+    all: all === true || all === false ? all : null,
     apiUser: req.apiUser,
     page: Number(page) || 1,
     count: Number(count) || 10,
