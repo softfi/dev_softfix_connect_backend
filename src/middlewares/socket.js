@@ -39,9 +39,9 @@ export const socketAuthentication = (socket, next) => {
         return;
       } else {
         var decoded = await jwtTokenValues(token);
-        console.log("------*******************--------");
+        console.log("------xxxxxxxxxxxxx--------");
         console.log(decoded);
-        console.log("------*******************--------");
+        console.log("------xxxxxxxxxxxx--------");
 
         if (!decoded) {
           console.log("Invalid socket token!");
