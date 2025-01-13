@@ -1,0 +1,345 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// -------------------------- MODEL --------------------------
+
+enum RoleName {
+  SUPER_ADMIN
+  ADMIN
+  EMPLOYEE
+}
+
+model Role {
+  id       Int      @id @default(autoincrement())
+  strongId Int      @unique
+  name     RoleName
+  users    User[]   @relation
+}
+
+model User {
+  id                 Int       @id @default(autoincrement())
+  uuid               String    @default(uuid())
+  name               String    @default("")
+  email              String
+  password           String
+  socketId           String    @default("")
+  role               Role      @relation(fields: [roleId], references: [id])
+  roleId             Int
+  image              Uploads?  @relation("UserImageIdUploads", fields: [imageId], references: [id])
+  imageId            Int?
+  isActive           Boolean   @default(true)
+  isOnline           Boolean   @default(false)
+  lastOnline         DateTime?
+  alwaysOpenSchedule Boolean   @default(false)
+  isDeleted          Boolean   @default(false)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  // Group Relation
+  CreatedGroup Group[] @relation("CreatedGroup")
+  UpdatedGroup Group[] @relation("UpdatedGroup")
+
+  // Group_Member Relation
+  AddedGroupMember  Group_Member[] @relation("AddedGroupMember")
+  UserIdGroupMember Group_Member[] @relation("UserIdGroupMember")
+
+  // Group_Logs Relation
+  FromIdGroupLog Group_Logs[] @relation("FromIdGroupLog")
+  ToIdGroupLog   Group_Logs[] @relation("ToIdGroupLog")
+
+  // Personal_Logs Relation
+  FromIdPersonalLog Personal_Logs[] @relation("FromIdPersonalLog")
+  ToIdPersonalLog   Personal_Logs[] @relation("ToIdPersonalLog")
+
+  // Uploads Relation
+  CreatedFile Uploads[] @relation("CreatedFile")
+
+  // Uploads Schedule
+  UpdatedSchedule Schedule[] @relation("UpdatedSchedule")
+
+  // Uploads Schedule Perms
+  CreatedSchedulePerms Special_Schedule_Permission[] @relation("CreatedSchedulePerms")
+  UpdatedSchedulePerms Special_Schedule_Permission[] @relation("UpdatedSchedulePerms")
+  UserSchedulePerms    Special_Schedule_Permission[] @relation("UserSchedulePerms")
+
+  // GroupLogView Relation
+  UserIdGroupLogView Group_Logs_Views[] @relation("UserIdGroupLogView")
+
+  // Connections Relation
+  SentConnection    Connections[] @relation("SentConnection")
+  UserId1Connection Connections[] @relation("UserId1Connection")
+  UserId2Connection Connections[] @relation("UserId2Connection")
+
+  // Block Relation
+  UserIdBlockLog  Block_Logs[] @relation("UserIdBlockLog")
+  BlockIdBlockLog Block_Logs[] @relation("BlockIdBlockLog")
+
+  // Notification Relation
+  UserIdNotification Notification[] @relation("UserIdNotification")
+  connectionSenderIdNotification Notification[] @relation("connectionSenderIdNotification")
+  groupAdderIdNotification Notification[] @relation("groupAdderIdNotification")
+  repliedPersonIdNotification Notification[] @relation("repliedPersonIdNotification")
+}
+
+model Group {
+  id          Int      @id @default(autoincrement())
+  uuid        String   @unique @default(uuid())
+  code        String   @unique @default("")
+  name        String   @default("")
+  description String   @db.Text
+  icon        Uploads? @relation("GroupIconIdUploads", fields: [iconId], references: [id])
+  iconId      Int?
+
+  isActive  Boolean  @default(true)
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  createdBy   User @relation("CreatedGroup", fields: [createdById], references: [id])
+  createdById Int
+  updatedBy   User @relation("UpdatedGroup", fields: [updatedById], references: [id])
+  updatedById Int
+
+  // GroupMember Relation
+  GroupIdGroupMember Group_Member[] @relation("GroupIdGroupMember")
+
+  // GroupLog Relation
+  GroupIdGroupLog Group_Logs[] @relation("GroupIdGroupLog")
+
+  // GroupLog Relation
+  GroupIdGroupLogView Group_Logs_Views[] @relation("GroupIdGroupLogView")
+}
+
+model Group_Member {
+  id Int @id @default(autoincrement())
+
+  user   User @relation("UserIdGroupMember", fields: [userId], references: [id])
+  userId Int
+
+  group   Group @relation("GroupIdGroupMember", fields: [groupId], references: [id])
+  groupId Int
+
+  addedAt DateTime @default(now())
+  unseen  Int      @default(0)
+
+  addedBy   User @relation("AddedGroupMember", fields: [addedById], references: [id])
+  addedById Int
+}
+
+enum LogType {
+  MESSAGE
+  ACTION
+}
+
+enum MsgType {
+  TEXT
+  FILE
+}
+
+model Group_Logs {
+  id Int @id @default(autoincrement())
+
+  group   Group @relation("GroupIdGroupLog", fields: [groupId], references: [id])
+  groupId Int
+
+  from   User @relation("FromIdGroupLog", fields: [fromId], references: [id])
+  fromId Int
+
+  to   User? @relation("ToIdGroupLog", fields: [toId], references: [id])
+  toId Int?
+
+  repliedTo   Group_Logs? @relation("RepliedIdGroupLog", fields: [repliedToId], references: [id])
+  repliedToId Int?
+
+  content String @db.Text
+
+  type    LogType
+  msgType MsgType?
+
+  file   Uploads? @relation("FileIdUploads", fields: [fileId], references: [id])
+  fileId Int?
+
+  isEdited  Boolean  @default(false)
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  editedAt  DateTime @updatedAt
+
+  // GROUP_LOG relation
+  RepliedIdGroupLog Group_Logs[] @relation("RepliedIdGroupLog")
+
+  // GROUP_LOG_VIEW Relation
+  LogIdGroupLogView Group_Logs_Views[] @relation("LogIdGroupLogView")
+}
+
+model Group_Logs_Views {
+  id Int @id @default(autoincrement())
+
+  log   Group_Logs @relation("LogIdGroupLogView", fields: [logId], references: [id])
+  logId Int
+
+  group   Group @relation("GroupIdGroupLogView", fields: [groupId], references: [id])
+  groupId Int
+
+  user   User @relation("UserIdGroupLogView", fields: [userId], references: [id])
+  userId Int
+
+  viewAt DateTime @default(now())
+}
+
+model Uploads {
+  id          Int      @id @default(autoincrement())
+  extension   String   @default("")
+  path        String   @default("")
+  createdAt   DateTime @default(now())
+  createdBy   User?    @relation("CreatedFile", fields: [createdById], references: [id])
+  createdById Int?
+
+  // UPLOADS relation
+  FileIdUploads Group_Logs[] @relation("FileIdUploads")
+
+  // PERSONAL UPLOADS relation
+  FileIdPersonalUploads Personal_Logs[] @relation("FileIdPersonalUploads")
+
+  // USER relation
+  UserImageIdUploads User[] @relation("UserImageIdUploads")
+
+  // GROUP relation
+  GroupIconIdUploads Group[] @relation("GroupIconIdUploads")
+}
+
+model Schedule {
+  id          Int      @id @default(autoincrement())
+  day         Int      @unique
+  name        String
+  startTime   String
+  endTime     String
+  off         Boolean  @default(false)
+  updatedAt   DateTime @updatedAt
+  updatedBy   User     @relation("UpdatedSchedule", fields: [updatedById], references: [id])
+  updatedById Int
+}
+
+model Special_Schedule_Permission {
+  id          Int      @id @default(autoincrement())
+  user        User     @relation("UserSchedulePerms", fields: [userId], references: [id])
+  userId      Int
+  expireTime  DateTime
+  createdAt   DateTime @default(now())
+  createdBy   User     @relation("CreatedSchedulePerms", fields: [createdById], references: [id])
+  createdById Int
+  updatedAt   DateTime @default(now())
+  updatedBy   User     @relation("UpdatedSchedulePerms", fields: [updatedById], references: [id])
+  updatedById Int
+}
+
+model Personal_Logs {
+  id Int @id @default(autoincrement())
+
+  connection   Connections @relation("ConnectionIdPersonalLog", fields: [connectionId], references: [id])
+  connectionId Int
+
+  from   User @relation("FromIdPersonalLog", fields: [fromId], references: [id])
+  fromId Int
+
+  to   User? @relation("ToIdPersonalLog", fields: [toId], references: [id])
+  toId Int?
+
+  repliedTo   Personal_Logs? @relation("RepliedIdPersonalLog", fields: [repliedToId], references: [id])
+  repliedToId Int?
+
+  content String @db.Text
+
+  type    LogType
+  msgType MsgType?
+
+  file   Uploads? @relation("FileIdPersonalUploads", fields: [fileId], references: [id])
+  fileId Int?
+
+  isEdited  Boolean   @default(false)
+  isDeleted Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  editedAt  DateTime  @updatedAt
+  seenAt    DateTime?
+
+  // PERSONAL_LOG relation
+  RepliedIdPersonalLog Personal_Logs[] @relation("RepliedIdPersonalLog")
+}
+
+model Block_Logs {
+  id Int @id @default(autoincrement())
+
+  user   User @relation("UserIdBlockLog", fields: [userId], references: [id])
+  userId Int
+
+  block   User @relation("BlockIdBlockLog", fields: [blockId], references: [id])
+  blockId Int
+
+  blockedAt DateTime @default(now())
+}
+
+enum ConnectionStatus {
+  PENDING
+  ACTIVE
+  BLOCKED
+  REJECTED
+}
+
+model Connections {
+  id Int @id @default(autoincrement())
+
+  user1   User @relation("UserId1Connection", fields: [userId1], references: [id])
+  userId1 Int
+
+  user2   User @relation("UserId2Connection", fields: [userId2], references: [id])
+  userId2 Int
+
+  status ConnectionStatus
+
+  sentAt DateTime @default(now())
+
+  sentBy   User @relation("SentConnection", fields: [sentById], references: [id])
+  sentById Int
+
+  // CONNECTION_LOG relation
+  ConnectionIdPersonalLog Personal_Logs[] @relation("ConnectionIdPersonalLog")
+
+  @@index([userId1, userId2, status])
+}
+
+enum NotificationType {
+  CONNECTION_REQUEST
+  GROUP
+}
+
+model Notification {
+  id Int @id @default(autoincrement())
+
+  user   User @relation("UserIdNotification", fields: [userId], references: [id])
+  userId Int
+
+  type    NotificationType
+  content String           @db.Text
+
+  createdAt DateTime @default(now())
+
+  isSeen Boolean   @default(false)
+  seenAt DateTime?
+
+  connectionSender   User? @relation("connectionSenderIdNotification", fields: [connectionSenderId], references: [id])
+  connectionSenderId Int?
+
+  groupAdder   User? @relation("groupAdderIdNotification", fields: [groupAdderId], references: [id])
+  groupAdderId Int?
+
+  repliedPerson   User? @relation("repliedPersonIdNotification", fields: [repliedPersonId], references: [id])
+  repliedPersonId Int?
+
+  @@index([userId, type])
+}
+ 

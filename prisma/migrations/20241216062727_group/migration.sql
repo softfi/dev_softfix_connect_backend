@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `group` ADD COLUMN `maxUser` INTEGER NOT NULL DEFAULT 10;

@@ -1,0 +1,20 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging to AWS...
+      - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 156041438947.dkr.ecr.ap-south-1.amazonaws.com
+  build:
+    commands:
+      - echo Build started on $(date)
+      - docker build -t softfix-connect-backend .
+      - docker tag softfix-connect-backend:latest 156041438947.dkr.ecr.ap-south-1.amazonaws.com/softfix-connect-backend:latest
+  post_build:
+    commands:
+      - echo Build completed on $(date)
+      - docker push 156041438947.dkr.ecr.ap-south-1.amazonaws.com/softfix-connect-backend:latest
+      - printf '[{"name":"softfix-connect-backend","imageUri":"%s"}]\n' 156041438947.dkr.ecr.ap-south-1.amazonaws.com/softfix-connect-backend:latest > imagedefinitions.json
+      - echo Pushed to ECR
+artifacts:
+  files: imagedefinitions.json
