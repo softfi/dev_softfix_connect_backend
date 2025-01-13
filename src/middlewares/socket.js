@@ -13,7 +13,7 @@ export const socketAuthentication = (socket, next) => {
     }
     let token = null;
 console.log("-----------");
-console.log(authHandshake?.headers);
+console.log(authHandshake?.auth);
 console.log("-----------");
 console.log(APP_ENV);
 
