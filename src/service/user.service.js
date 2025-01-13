@@ -301,13 +301,13 @@ class UserService {
   }
 
   async notInGroup({ page, count, search, groupId }) {
-    const rawQuery = `SELECT user.id,user.uuid,user.name,user.email,user.roleId,user.imageId,user.createdAt,user.updatedAt, user.alwaysOpenSchedule,role.strongId, role.name as roleName, uploads.extension, uploads.path FROM User user LEFT JOIN Uploads uploads ON user.imageId = uploads.id LEFT JOIN Role role on user.roleId = role.id WHERE user.id NOT IN (SELECT DISTINCT userId FROM Group_Member WHERE groupId = ${groupId}) AND role.strongId > 2 AND (user.name LIKE CONCAT('%', '${search}', '%') OR user.email LIKE CONCAT('%', '${search}', '%')) ORDER BY id DESC LIMIT ${count} OFFSET ${
+    const rawQuery = `SELECT user.id,user.uuid,user.name,user.email,user.roleId,user.imageId,user.createdAt,user.updatedAt, user.alwaysOpenSchedule,role.strongId, role.name as roleName, uploads.extension, uploads.path FROM User user LEFT JOIN Uploads uploads ON user.imageId = uploads.id LEFT JOIN Role role on user.roleId = role.id WHERE user.isDeleted = 0 && user.id NOT IN (SELECT DISTINCT userId FROM Group_Member WHERE groupId = ${groupId}) AND role.strongId > 2 AND (user.name LIKE CONCAT('%', '${search}', '%') OR user.email LIKE CONCAT('%', '${search}', '%')) ORDER BY id DESC LIMIT ${count} OFFSET ${
       (page - 1) * count
     }`;
 
     let userList = await this.#user.raw(rawQuery);
 
-    const rawTotalCountQuery = `SELECT COUNT(*) as count FROM User user LEFT JOIN Role role on user.roleId = role.id WHERE user.id NOT IN (SELECT DISTINCT userId FROM Group_Member WHERE groupId = ${groupId}) AND role.strongId > 2 AND (user.name LIKE CONCAT('%', '${search}', '%') OR user.email LIKE CONCAT('%', '${search}', '%'))`;
+    const rawTotalCountQuery = `SELECT COUNT(*) as count FROM User user LEFT JOIN Role role on user.roleId = role.id WHERE user.isDeleted = 0 && user.id NOT IN (SELECT DISTINCT userId FROM Group_Member WHERE groupId = ${groupId}) AND role.strongId > 2 AND (user.name LIKE CONCAT('%', '${search}', '%') OR user.email LIKE CONCAT('%', '${search}', '%'))`;
 
     let totalCount = parseInt(
       (await this.#user.raw(rawTotalCountQuery))[0]?.count
