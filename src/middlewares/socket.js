@@ -12,6 +12,10 @@ export const socketAuthentication = (socket, next) => {
       return;
     }
     let token = null;
+console.log("authHandshake?.headers ===========");
+console.log(authHandshake?.headers);
+console.log("authHandshake?.auth ===========");
+console.log(authHandshake?.auth);
 
     if (APP_ENV === "development") {
       token = authHandshake?.headers["authorization"];
