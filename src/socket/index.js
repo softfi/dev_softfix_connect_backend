@@ -52,6 +52,13 @@ const startSocket = tryCatch(async (app) => {
       socket.join(groupInfo.group.uuid);
     }
 
+    io.engine.on("connection_error", (err) => {
+      console.log(err.req);
+      console.log(err.code);
+      console.log(err.message);
+      console.log(err.context);
+    });
+
     // printSocketConnection({ socket, currentUser });
     socket.on("disconnect", () => {
       userSocketServiceInstance.disconnection(socket);
