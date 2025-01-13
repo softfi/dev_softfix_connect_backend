@@ -12,16 +12,19 @@ export const socketAuthentication = (socket, next) => {
       return;
     }
     let token = null;
-console.log("authHandshake?.headers ===========");
-console.log(authHandshake?.headers);
-console.log("authHandshake?.auth ===========");
-console.log(authHandshake?.auth);
+    console.log("authHandshake?.headers ===========");
+    console.log(authHandshake?.headers);
+    console.log("authHandshake?.auth ===========");
+    console.log(authHandshake?.auth);
 
     if (APP_ENV === "development") {
       token = authHandshake?.headers["authorization"];
     } else {
       token = authHandshake?.auth["authorization"];
     }
+    console.log("--------------------");
+    console.log(token);
+    console.log("--------------------");
 
     if (!token) {
       console.log("Token not available!");
@@ -36,7 +39,10 @@ console.log(authHandshake?.auth);
         return;
       } else {
         var decoded = await jwtTokenValues(token);
-        
+        console.log("------*******************--------");
+        console.log(decoded);
+        console.log("------*******************--------");
+
         if (!decoded) {
           console.log("Invalid socket token!");
           socket.disconnect();
@@ -56,7 +62,7 @@ console.log(authHandshake?.auth);
         }
 
         let userInstance = new QueryService("user");
-        
+
         let userInfo = await userInstance.getDetails(
           { where: { id: decoded?.data?.id, isDeleted: false } },
           {
@@ -68,7 +74,7 @@ console.log(authHandshake?.auth);
             },
           }
         );
-        
+
         if (userInfo) {
           if (roleList.map((e) => e.id).includes(userInfo?.role?.id)) {
             socket.apiUser = { ...userInfo, socketId: socket.id };
