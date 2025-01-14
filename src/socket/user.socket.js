@@ -78,6 +78,9 @@ class UserSocketEventService {
         user: data.userId,
         action: data.action,
       });
+console.log("========");
+console.log(result);
+console.log("========");
 
       if (result.status) {
         let onlineCheck = await userServiceInstance.detailsById({
