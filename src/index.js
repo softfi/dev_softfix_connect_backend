@@ -26,6 +26,15 @@ app.get("/health-check", (req, res) => {
 /***************
   MIDDLEWARE 
 ****************/
+console.log(import.meta.dirname);
+
+app.use(
+  "/socket-io-admin",
+  express.static(
+    join(import.meta.dirname, "../node_modules/@socket.io/admin-ui/ui/dist")
+  )
+);
+
 app.use(fileUpload());
 // app.use(morgan("dev"));
 app.use(cors({ origin: "*", credentials: true }));

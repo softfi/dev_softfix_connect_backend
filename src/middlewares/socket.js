@@ -12,19 +12,12 @@ export const socketAuthentication = (socket, next) => {
       return;
     }
     let token = null;
-    // console.log("authHandshake?.headers ===========");
-    // console.log(authHandshake?.headers);
-    // console.log("authHandshake?.auth ===========");
-    // console.log(authHandshake?.auth);
 
     if (APP_ENV === "development") {
       token = authHandshake?.headers["authorization"];
     } else {
       token = authHandshake?.auth["authorization"];
     }
-    console.log("--------------------");
-    console.log(token);
-    console.log("--------------------");
 
     if (!token) {
       console.log("Token not available!");

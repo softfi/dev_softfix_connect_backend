@@ -6,6 +6,7 @@ import SocketEventService from "./group.socket.js";
 import { printSocketConnection } from "../log/action.js";
 import { tryCatch } from "../utils/helper.js";
 import UserSocketEventService from "./user.socket.js";
+import { instrument } from "@socket.io/admin-ui";
 
 const userServiceInstance = new UserService();
 const groupServiceInstance = new GroupService();
@@ -15,6 +16,11 @@ const startSocket = tryCatch(async (app) => {
     cors: {
       origin: "*",
     },
+  });
+
+  instrument(io, {
+    auth: false,
+    mode: "development",
   });
 
   const socketServiceInstance = new SocketEventService(io);
