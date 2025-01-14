@@ -298,7 +298,7 @@ class ConnectionService {
       where: {
         userId1: user,
         userId2: apiUser.id,
-        status: "PENDING",
+        // status: "PENDING",
       },
     });
 
