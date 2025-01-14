@@ -253,51 +253,6 @@ class PersonalService {
     }
   }
 
-  // async getLogList({ apiUser, page, count, search, urlPrefix }) {
-  //   const rawQuery = `SELECT PL.id, PL.fromId, PL.toId, PL.content, PL.type, PL.msgType, PL.createdAt, PL.seenAt, PL.connectionId, UF.uuid as fromUUID, UF.name as fromName, UF.email as fromEmail, UF.imageId as fromImageId, UT.uuid as toUUID, UT.name as toName, UT.email as toEmail,UT.imageId as toImageId FROM Personal_Logs PL LEFT JOIN User UF ON UF.id = PL.fromId LEFT JOIN User UT ON UT.id = PL.toId WHERE PL.isDeleted = 0 AND UF.isDeleted = 0 AND UT.isDeleted = 0 AND UF.id = ${
-  //     apiUser.id
-  //   } OR UT.id = ${
-  //     apiUser.id
-  //   } GROUP BY PL.connectionId ORDER BY PL.createdAt DESC LIMIT ${count} OFFSET ${
-  //     (page - 1) * count
-  //   }`;
-  //   let logs = await this.#personalLogs.raw(rawQuery);
-
-  //   const rawQueryCount = `SELECT COUNT(DISTINCT PL.connectionId) as count FROM Personal_Logs PL LEFT JOIN User UF ON UF.id = PL.fromId LEFT JOIN User UT ON UT.id = PL.toId WHERE PL.isDeleted = 0 AND UF.id = ${apiUser.id} OR UT.id = ${apiUser.id}`;
-  //   const totalCount = parseInt(
-  //     (await this.#personalLogs.raw(rawQueryCount))[0]?.count
-  //   );
-
-  //   logs = await Promise.all(
-  //     logs.map(async (item) => {
-  //       item.fromProfileImage = null;
-  //       item.toProfileImage = null;
-
-  //       if (item.fromImageId) {
-  //         let file = await this.#uploads.getDetails({
-  //           where: { id: item.fromImageId },
-  //         });
-  //         item.fromProfileImage = `${urlPrefix}${file?.path}`;
-  //       }
-
-  //       if (item.toImageId) {
-  //         let file = await this.#uploads.getDetails({
-  //           where: { id: item.toImageId },
-  //         });
-  //         item.toProfileImage = `${urlPrefix}${file?.path}`;;
-  //       }
-  //       return item;
-  //     })
-  //   );
-
-  //   return {
-  //     status: true,
-  //     msg: "Personal log created successfully",
-  //     data: logs,
-  //     count: totalCount,
-  //   };
-  // }
-
   // async getUnseenLogList({ connectionId, userId }) {
   //   // let logs = await this.#connection.get({
   //   //   where: {
@@ -383,140 +338,157 @@ class PersonalService {
   //   };
   // }
 
-  async getLogList({ apiUser, page, count, search, urlPrefix }) {
-    let logs = await this.#connection.get({
-      where: {
-        status: { in: ["ACTIVE", "BLOCKED"] },
-        OR: [
-          {
-            userId1: apiUser.id,
-          },
-          {
-            userId2: apiUser.id,
-          },
-        ],
-        user1: {
-          isDeleted: false,
-        },
-        user2: {
-          isDeleted: false,
-        },
-      },
-      select: {
-        id: true,
-        status: true,
-        user1: {
-          select: {
-            id: true,
-            uuid: true,
-            name: true,
-            email: true,
-            image: {
-              select: {
-                id: true,
-                extension: true,
-                path: true,
-              },
-            },
-          },
-        },
-        user2: {
-          select: {
-            id: true,
-            uuid: true,
-            name: true,
-            email: true,
-            image: {
-              select: {
-                id: true,
-                extension: true,
-                path: true,
-              },
-            },
-          },
-        },
-      },
-      skip: (page - 1) * count,
-      take: count,
-    });
+  // async getLogList({ apiUser, page, count, search, urlPrefix }) {
+  //   let paginationObj = {};
+  //   if (all !== true) {
+  //     paginationObj.skip = (page - 1) * count;
+  //     paginationObj.take = count;
+  //   }
+  //   let logs = await this.#connection.get({
+  //     where: {
+  //       status: { in: ["ACTIVE", "BLOCKED"] },
+  //       OR: [
+  //         {
+  //           userId1: apiUser.id,
+  //         },
+  //         {
+  //           userId2: apiUser.id,
+  //         },
+  //       ],
+  //       user1: {
+  //         isDeleted: false,
+  //       },
+  //       user2: {
+  //         isDeleted: false,
+  //       },
+  //     },
+  //     select: {
+  //       id: true,
+  //       status: true,
+  //       user1: {
+  //         select: {
+  //           id: true,
+  //           uuid: true,
+  //           name: true,
+  //           email: true,
+  //           image: {
+  //             select: {
+  //               id: true,
+  //               extension: true,
+  //               path: true,
+  //             },
+  //           },
+  //         },
+  //       },
+  //       user2: {
+  //         select: {
+  //           id: true,
+  //           uuid: true,
+  //           name: true,
+  //           email: true,
+  //           image: {
+  //             select: {
+  //               id: true,
+  //               extension: true,
+  //               path: true,
+  //             },
+  //           },
+  //         },
+  //       },
+  //     },
+  //     ...paginationObj,
+  //   });
 
-    logs = await Promise.all(
-      logs.map(async (item) => {
-        if (item.user1?.image) {
-          item.user1.image.path = `${urlPrefix}${item.user1.image.path}`;
-        }
-        if (item.user2?.image) {
-          item.user2.image.path = `${urlPrefix}${item.user2.image.path}`;
-        }
-        let lastLog = await this.#personalLogs.get({
-          where: { connectionId: item.id, isDeleted: false },
-          select: {
-            id: true,
-            content: true,
-            type: true,
-            msgType: true,
-            seenAt: true,
-            repliedToId: true,
-          },
-          orderBy: { createdAt: "desc" },
-          take: 1,
-        });
+  //   logs = await Promise.all(
+  //     logs.map(async (item) => {
+  //       if (item.user1?.image) {
+  //         item.user1.image.path = `${urlPrefix}${item.user1.image.path}`;
+  //       }
+  //       if (item.user2?.image) {
+  //         item.user2.image.path = `${urlPrefix}${item.user2.image.path}`;
+  //       }
+  //       let lastLog = await this.#personalLogs.get({
+  //         where: { connectionId: item.id, isDeleted: false },
+  //         select: {
+  //           id: true,
+  //           content: true,
+  //           type: true,
+  //           msgType: true,
+  //           seenAt: true,
+  //           repliedToId: true,
+  //         },
+  //         orderBy: { createdAt: "desc" },
+  //         take: 1,
+  //       });
 
-        let unseenMsgCount = await this.#personalLogs.count({
-          where: {
-            connectionId: item.id,
-            toId: apiUser.id,
-            seenAt: null,
-            isDeleted: false,
-          },
-        });
+  //       let unseenMsgCount = await this.#personalLogs.count({
+  //         where: {
+  //           connectionId: item.id,
+  //           toId: apiUser.id,
+  //           seenAt: null,
+  //           isDeleted: false,
+  //         },
+  //       });
 
-        item.lastMessage = lastLog.length > 0 ? lastLog[0] : null;
-        item.unseenMsg = unseenMsgCount;
-        return item;
-      })
-    );
+  //       item.lastMessage = lastLog.length > 0 ? lastLog[0] : null;
+  //       item.unseenMsg = unseenMsgCount;
+  //       return item;
+  //     })
+  //   );
 
-    let customLog = logs;
+  //   let customLog = logs;
 
-    for (let i = 0; i < customLog.length; i++) {
-      for (let j = 0; j < customLog.length - i - 1; j++) {
-        if (
-          customLog[j].lastMessage?.createdAt <
-          customLog[j + 1].lastMessage?.createdAt
-        ) {
-          let temp = customLog[j];
-          customLog[j] = customLog[j + 1];
-          customLog[j + 1] = temp;
-        }
-      }
-    }
+  //   for (let i = 0; i < customLog.length; i++) {
+  //     for (let j = 0; j < customLog.length - i - 1; j++) {
+  //       if (
+  //         customLog[j].lastMessage?.createdAt <
+  //         customLog[j + 1].lastMessage?.createdAt
+  //       ) {
+  //         let temp = customLog[j];
+  //         customLog[j] = customLog[j + 1];
+  //         customLog[j + 1] = temp;
+  //       }
+  //     }
+  //   }
 
-    const totalCount = await this.#connection.count({
-      where: {
-        status: { in: ["ACTIVE", "BLOCKED"] },
-        OR: [
-          {
-            userId1: apiUser.id,
-          },
-          {
-            userId2: apiUser.id,
-          },
-        ],
-        user1: {
-          isDeleted: false,
-        },
-        user2: {
-          isDeleted: false,
-        },
-      },
-    });
+  //   const totalCount = await this.#connection.count({
+  //     where: {
+  //       status: { in: ["ACTIVE", "BLOCKED"] },
+  //       OR: [
+  //         {
+  //           userId1: apiUser.id,
+  //         },
+  //         {
+  //           userId2: apiUser.id,
+  //         },
+  //       ],
+  //       user1: {
+  //         isDeleted: false,
+  //       },
+  //       user2: {
+  //         isDeleted: false,
+  //       },
+  //     },
+  //   });
 
+  //   return {
+  //     status: true,
+  //     msg: "Personal log created successfully",
+  //     data: logs,
+  //     count: totalCount,
+  //   };
+  // }
+
+  async getLogList({ apiUser, urlPrefix}) {
+
+    let rawQuery = `SELECT plog.content as lastMsg_Content,plog.type as lastMsg_Type, plog.msgType as lastMsg_msgType, plog.createdAt as lastMsg_createdAt,plog.seenAt as lastMsg_seenAt, plog.fromId as lastMsgFromId, con.id, con.status, usr.id as userId, usr.name as userName, usr.uuid as userUUID, usr.email as userEmail, usr.imageId as userImageId, CONCAT('${urlPrefix}', uploads.path) as finalPath, (SELECT CAST(COUNT(inPlog.id) as CHAR) FROM Personal_Logs inPlog WHERE inPlog.connectionId = con.id AND toId = ${apiUser.id} and inPlog.seenAt IS NULL) as unseenMsgCount FROM Connections con LEFT JOIN User usr ON usr.id = (CASE WHEN con.userId1 = ${apiUser.id} THEN con.userId2 ELSE con.userId1 END) LEFT JOIN Uploads uploads ON uploads.id = usr.imageId LEFT JOIN (SELECT pl1.connectionId, pl1.id, pl1.content, pl1.type, pl1.msgType, pl1.seenAt, pl1.fromId, pl1.toId, pl1.createdAt FROM Personal_Logs pl1 WHERE pl1.isDeleted = 0 AND pl1.id = (SELECT MAX(pl2.id) FROM Personal_Logs pl2 WHERE pl2.connectionId = pl1.connectionId AND pl2.isDeleted = 0)) plog ON plog.connectionId = con.id WHERE (con.userId1 = ${apiUser.id} OR con.userId2 = ${apiUser.id}) AND usr.isDeleted = 0 AND (con.status = 'ACTIVE' OR con.status = 'BLOCKED') ORDER BY plog.createdAt DESC`;
+
+    let logs = await this.#connection.raw(rawQuery);
+    
     return {
       status: true,
-      msg: "Personal log created successfully",
+      msg: "Personal log fetched successfully",
       data: logs,
-      count: totalCount,
     };
   }
 

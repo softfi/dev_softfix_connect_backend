@@ -1,18 +1,22 @@
 import BlockService from "../service/block.service.js";
 import ConnectionService from "../service/connection.service.js";
-import NotificationService from "../service/notification.service.js";
 import PersonalService from "../service/personal.service.js";
 import UserService from "../service/user.service.js";
 import { currentDateTimeIndian } from "../utils/helper.js";
-
-const connectionServiceInstance = new ConnectionService();
-const userServiceInstance = new UserService();
-const notificationServiceInstance = new NotificationService();
-const personalServiceInstance = new PersonalService();
-const blockServiceInstance = new BlockService();
+import CommonSocketService from "./common.socket.js";
 
 class UserSocketEventService {
+  #connectionServiceInstance;
+  #userServiceInstance;
+  #personalServiceInstance;
+  #blockServiceInstance;
+  #commonSocketService;
   constructor(io) {
+    this.#connectionServiceInstance = new ConnectionService();
+    this.#userServiceInstance = new UserService();
+    this.#personalServiceInstance = new PersonalService();
+    this.#blockServiceInstance = new BlockService();
+    this.#commonSocketService = new CommonSocketService();
     this.io = io;
   }
 
@@ -21,7 +25,7 @@ class UserSocketEventService {
     console.log(socket?.apiUser);
     console.log("****************** DISCONNECT ******************");
 
-    await userServiceInstance.update({
+    await this.#userServiceInstance.update({
       uuid: socket?.apiUser?.uuid,
       isOnline: false,
       lastOnline: currentDateTimeIndian(new Date()),
@@ -29,17 +33,17 @@ class UserSocketEventService {
   }
 
   async sendConnectionRequest(socket, data) {
-    let result = await connectionServiceInstance.sendConnectionReq({
+    let result = await this.#connectionServiceInstance.sendConnectionReq({
       apiUser: socket.apiUser,
       toId: data.toUUID,
     });
 
     if (result.status) {
-      let onlineCheck = await userServiceInstance.details({
+      let onlineCheck = await this.#userServiceInstance.details({
         uuid: data.toUUID,
       });
 
-      let reqSenderDetails = await userServiceInstance.details({
+      let reqSenderDetails = await this.#userServiceInstance.details({
         uuid: socket.apiUser.uuid,
       });
 
@@ -64,30 +68,22 @@ class UserSocketEventService {
   }
 
   async actionOnConnectionRequest(socket, data) {
-    console.log("------ DATA ---------");
-    console.log(data);
-    console.log("*************");
-    console.log(socket.apiUser);
-    
     if (
       (data?.userId && data?.action === "REJECTED") ||
       data?.action === "ACTIVE"
     ) {
-      let result = await connectionServiceInstance.updateConnectionReq({
+      let result = await this.#connectionServiceInstance.updateConnectionReq({
         apiUser: socket.apiUser,
         user: data.userId,
         action: data.action,
       });
-console.log("========");
-console.log(result);
-console.log("========");
 
       if (result.status) {
-        let onlineCheck = await userServiceInstance.detailsById({
+        let onlineCheck = await this.#userServiceInstance.detailsById({
           id: data.userId,
         });
 
-        let reqSenderDetails = await userServiceInstance.details({
+        let reqSenderDetails = await this.#userServiceInstance.details({
           uuid: socket.apiUser.uuid,
         });
 
@@ -116,7 +112,7 @@ console.log("========");
   }
 
   async sendMessageInPersonal(socket, data) {
-    let userInfo = await userServiceInstance.details({
+    let userInfo = await this.#userServiceInstance.details({
       uuid: socket.apiUser.uuid,
     });
     if (!userInfo.status) {
@@ -130,13 +126,15 @@ console.log("========");
       throw new Error("Invalid receiver UUID");
     }
 
-    let receiverInfo = await userServiceInstance.details({ uuid: data.toUUID });
+    let receiverInfo = await this.#userServiceInstance.details({
+      uuid: data.toUUID,
+    });
     if (!receiverInfo.status) {
       throw new Error("Invalid receiver id");
     }
 
     const connectionInfo =
-      await connectionServiceInstance.getConnectionDetailsByUserId({
+      await this.#connectionServiceInstance.getConnectionDetailsByUserId({
         user1: userInfo.data.id,
         user2: receiverInfo?.data?.id,
       });
@@ -149,7 +147,7 @@ console.log("========");
       throw new Error("Cannot send an empty message!F");
     }
 
-    let blockInfo = await blockServiceInstance.details({
+    let blockInfo = await this.#blockServiceInstance.details({
       userId: receiverInfo.data.id,
       blockId: userInfo.data.id,
     });
@@ -159,7 +157,7 @@ console.log("========");
     }
 
     const urlPrefix = `http://${socket.handshake.headers.host}/public-uploads/`;
-    let newLogEntry = await personalServiceInstance.create({
+    let newLogEntry = await this.#personalServiceInstance.create({
       connectionId: connectionInfo.data.id,
       fromId: userInfo.data.id,
       toId: receiverInfo.data.id,
@@ -188,7 +186,7 @@ console.log("========");
       throw new Error("Invalid msgId");
     }
 
-    let userInfo = await userServiceInstance.details({
+    let userInfo = await this.#userServiceInstance.details({
       uuid: socket.apiUser.uuid,
     });
     if (!userInfo.status) {
@@ -198,45 +196,54 @@ console.log("========");
       throw new Error("Socket id not available");
     }
 
-    let receiverInfo = await userServiceInstance.details({
+    let receiverInfo = await this.#userServiceInstance.details({
       uuid: data.userUUID,
     });
     if (!receiverInfo.status) {
       throw new Error("Invalid userUUID");
     }
 
-    let personalLogInfo = await personalServiceInstance.getSingleLogDetail({
-      logId: data.msgId,
-    });
+    let personalLogInfo =
+      await this.#personalServiceInstance.getSingleLogDetail({
+        logId: data.msgId,
+      });
 
     if (!personalLogInfo.status) {
       throw new Error("Invalid msgId");
     }
 
     if (personalLogInfo.data.from.uuid === data.userUUID) {
-      await personalServiceInstance.update({
+      await this.#personalServiceInstance.update({
         logId: data.msgId,
         isSeen: currentDateTimeIndian(new Date()),
       });
     } else {
-      socket.emit("personal-list-updated", { status: true, log: null });
+      const urlPrefix = `http://${socket.handshake.headers.host}/public-uploads/`;
+      let data = {
+        urlPrefix,
+      };
+      await this.#commonSocketService.personalListUpdate({ socket, data });
+      // await this.socket.emit("personal-list-updated", {
+      //   status: true,
+      //   log: null,
+      // });
     }
   }
 
   async deletePersonalMessage(socket, data) {
-    let userInfo = await userServiceInstance.details({
+    let userInfo = await this.#userServiceInstance.details({
       uuid: socket.apiUser.uuid,
     });
     if (!userInfo.status) {
       throw new Error("Invalid user id");
     }
 
-    let toInfo = await userServiceInstance.details({ uuid: data.toUUID });
+    let toInfo = await this.#userServiceInstance.details({ uuid: data.toUUID });
     if (!toInfo.status) {
       throw new Error("Invalid toUUID");
     }
 
-    let deleteStatus = await personalServiceInstance.delete({
+    let deleteStatus = await this.#personalServiceInstance.delete({
       apiUser: socket.apiUser,
       msgId: data.msgId,
     });

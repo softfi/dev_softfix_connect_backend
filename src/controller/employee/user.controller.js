@@ -135,14 +135,14 @@ export const getEmployeeConnections = tryCatch(async (req, res) => {
 });
 
 export const employeeUserLogList = tryCatch(async (req, res) => {
-  let { page, count, search } = req.body;
+  // let { page, count, search } = req.body;
   const urlPrefix = `${req.protocol}://${req.headers.host}/public-uploads/`;
 
   let result = await PersonalInstance.getLogList({
     apiUser: req.apiUser,
-    page: Number(page) || 1,
-    count: Number(count) || 10,
-    search: search || "",
+    // page: Number(page) || 1,
+    // count: Number(count) || 10,
+    // search: search || "",
     urlPrefix,
   });
 
