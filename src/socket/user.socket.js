@@ -20,7 +20,7 @@ class UserSocketEventService {
     console.log("****************** DISCONNECT ******************");
     console.log(socket?.apiUser);
     console.log("****************** DISCONNECT ******************");
-    
+
     await userServiceInstance.update({
       uuid: socket?.apiUser?.uuid,
       isOnline: false,
@@ -29,13 +29,6 @@ class UserSocketEventService {
   }
 
   async sendConnectionRequest(socket, data) {
-
-    console.log("*********************");
-    console.log(socket.apiUser);
-    console.log("*********************");
-    console.log(data);
-    console.log("*********************");
-    
     let result = await connectionServiceInstance.sendConnectionReq({
       apiUser: socket.apiUser,
       toId: data.toUUID,
@@ -58,7 +51,10 @@ class UserSocketEventService {
         const dataToSend = {
           status: true,
           msg: "Connection request received",
-          log: null,
+          log: {
+            type: "REQUEST",
+            data: null,
+          },
         };
         socket
           .to(onlineCheck.data.socketId)
@@ -68,6 +64,11 @@ class UserSocketEventService {
   }
 
   async actionOnConnectionRequest(socket, data) {
+    console.log("------ DATA ---------");
+    console.log(data);
+    console.log("*************");
+    console.log(socket.apiUser);
+    
     if (
       (data?.userId && data?.action === "REJECTED") ||
       data?.action === "ACTIVE"
@@ -97,6 +98,7 @@ class UserSocketEventService {
               status: true,
               msg: "Connection request accepted",
               log: {
+                type: "REQUEST",
                 action: data.action,
                 data: reqSenderDetails?.data || null,
               },

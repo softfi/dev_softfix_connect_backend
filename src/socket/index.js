@@ -65,6 +65,14 @@ const startSocket = tryCatch(async (app) => {
       userSocketServiceInstance.disconnection(socket);
     });
 
+    socket.on("add-member-in-group", (data) =>
+      socketServiceInstance.addMemberInGroup(
+        socket,
+        data,
+        "add-member-in-group"
+      )
+    );
+
     socket.on("send-message-in-group", (data) =>
       socketServiceInstance.sendMessageInGroup(socket, data)
     );
