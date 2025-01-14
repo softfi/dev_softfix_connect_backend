@@ -24,6 +24,7 @@ export const actionContent = Object.freeze({
   blockConnection: `<p><span style='font-weight:900'>#@from#</span> blocked <span style='font-weight:900'>#@to#</span></p>`,
   notificationConnectionRequestSend: `<p><b>#@connectionSender#</b> sent you a connection request</p>`,
   notificationConnectionRequestAccept: `<p><b>#@connectionSender#</b> accepted your connection request</p>`,
+  notificationGroupAdd: `<p><b>#@groupAdder#</b> added you in a group</p>`,
 });
 
 export const scheduleDefaultData = [

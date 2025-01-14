@@ -4,13 +4,16 @@ import {
   generateRandomString,
 } from "../utils/helper.js";
 import QueryService from "./database/query.service.js";
+import NotificationService from "./notification.service.js";
 
 class GroupService {
   constructor() {
+    this.user = new QueryService("user");
     this.group = new QueryService("group");
     this.groupMember = new QueryService("Group_Member");
     this.groupLog = new QueryService("Group_Logs");
     this.groupViewLog = new QueryService("Group_Logs_Views");
+    this.notification = new NotificationService();
   }
 
   async create({ apiUser, name, description, isActive, code, icon }) {
@@ -321,7 +324,15 @@ class GroupService {
       };
     }
 
+    let memberInfo = [];
     for (let mId of member) {
+      let userData = await this.user.getDetails({
+        where: { id: mId, isDeleted: false },
+      });
+
+      if (!userData) {
+        continue;
+      }
       let memberCheck = await this.groupMember.getDetails({
         where: {
           userId: mId,
@@ -348,6 +359,13 @@ class GroupService {
               content: actionContent.addMember,
             },
           });
+          await this.notification.createNotification({
+            userId: mId,
+            type: "GROUP",
+            content: actionContent.notificationGroupAdd,
+            groupAdderId: apiUser.id,
+          });
+          memberInfo.push(userData);
         }
       }
     }
@@ -355,6 +373,7 @@ class GroupService {
     return {
       status: true,
       msg: "Member added in the group successfully",
+      data: memberInfo,
     };
   }
 
@@ -494,7 +513,7 @@ class GroupService {
     };
   }
 
-  async listByUser({ apiUser, search }) {
+  async listByUser({ apiUser, search, urlPrefix }) {
     let filter = {
       userId: apiUser.id,
       group: {
@@ -514,6 +533,13 @@ class GroupService {
             code: true,
             name: true,
             isActive: true,
+            icon: {
+              select: {
+                id: true,
+                extension: true,
+                path: true,
+              },
+            },
           },
         },
         unseen: true,
@@ -564,6 +590,9 @@ class GroupService {
           item.lastMessage = lastMsg[0];
         }
 
+        if (item?.group?.icon) {
+          item.group.icon.path = `${urlPrefix}${item.group.icon.path}`;
+        }
         return item;
       })
     );

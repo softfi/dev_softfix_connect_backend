@@ -60,7 +60,8 @@ const startSocket = tryCatch(async (app) => {
       console.log("------x-------");
     });
 
-    printSocketConnection({ socket, currentUser });
+    // printSocketConnection({ socket, currentUser });
+
     socket.on("disconnect", () => {
       userSocketServiceInstance.disconnection(socket);
     });

@@ -56,7 +56,7 @@ class UserSocketEventService {
           status: true,
           msg: "Connection request received",
           log: {
-            type: "REQUEST",
+            type: "CONNECTION_REQUEST",
             data: null,
           },
         };
@@ -97,7 +97,7 @@ class UserSocketEventService {
               status: true,
               msg: "Connection request accepted",
               log: {
-                type: "REQUEST",
+                type: "CONNECTION_REQUEST",
                 action: data.action,
                 data: reqSenderDetails?.data || null,
               },

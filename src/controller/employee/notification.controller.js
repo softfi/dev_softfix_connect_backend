@@ -18,6 +18,7 @@ export const notificationList = tryCatch(async (req, res) => {
     markSeen: markSeen,
     page: Number(page) || 1,
     count: Number(count) || 10,
+    urlPrefix
   });
 
   if (result.status) {

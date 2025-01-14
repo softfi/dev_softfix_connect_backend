@@ -1,12 +1,15 @@
+import GroupService from "../service/group.service.js";
 import PersonalService from "../service/personal.service.js";
 
 class CommonSocketService {
   #personalInstance;
+  #groupInstance;
   constructor() {
     this.#personalInstance = new PersonalService();
+    this.#groupInstance = new GroupService();
   }
 
-  async sendSocketResponse(socket, status, event, message, data) {
+  async sendSocketResponse(socket, { status, event, message, data }) {
     const dataToSend = {
       status,
       event,
@@ -25,14 +28,34 @@ class CommonSocketService {
     const dataToSend = {
       status: false,
       message: "",
-      data: [],
+      log: [],
     };
     if (result.status) {
       dataToSend.status = true;
       dataToSend.message = result.msg;
-      dataToSend.data = result.data;
+      dataToSend.log = result.data;
     }
     socket.emit("personal-list-updated", dataToSend);
+  }
+
+  async groupListUpdate(socket, data) {
+    let result = await this.#groupInstance.listByUser({
+      apiUser: socket.apiUser,
+      urlPrefix: data?.urlPrefix || "",
+      search: data?.search || "",
+    });
+
+    const dataToSend = {
+      status: false,
+      message: "",
+      log: [],
+    };
+    if (result.status) {
+      dataToSend.status = true;
+      dataToSend.message = result.msg;
+      dataToSend.log = result.data;
+    }
+    socket.emit("group-list-updated", dataToSend);
   }
 }
 

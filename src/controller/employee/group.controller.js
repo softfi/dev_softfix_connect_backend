@@ -8,9 +8,11 @@ import GroupService from "../../service/group.service.js";
 const EmpGroupInstance = new GroupService();
 
 export const employeeGroupList = tryCatch(async (req, res) => {
+  const urlPrefix = `${req.protocol}://${req.headers.host}/public-uploads/`;
   let result = await EmpGroupInstance.listByUser({
     apiUser: req.apiUser,
     search: req?.query?.search || "",
+    urlPrefix
   });
   if (result.status) {
     return sendResponseOk(res, result.msg, { data: result.data });

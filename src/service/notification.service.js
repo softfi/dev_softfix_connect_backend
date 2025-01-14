@@ -62,7 +62,15 @@ class NotificationService {
     };
   }
 
-  async getNotificationsList({ userId, isSeen, type, page, count, markSeen }) {
+  async getNotificationsList({
+    userId,
+    isSeen,
+    type,
+    page,
+    count,
+    markSeen,
+    urlPrefix,
+  }) {
     let userInfo = await this.#user.getDetails({
       where: { id: userId, isDeleted: false },
     });
@@ -100,6 +108,9 @@ class NotificationService {
             uuid: true,
             name: true,
             email: true,
+            image: {
+              select: { id: true, extension: true, path: true },
+            },
           },
         },
         groupAdder: {
@@ -108,6 +119,9 @@ class NotificationService {
             uuid: true,
             name: true,
             email: true,
+            image: {
+              select: { id: true, extension: true, path: true },
+            },
           },
         },
         repliedPerson: {
@@ -116,6 +130,9 @@ class NotificationService {
             uuid: true,
             name: true,
             email: true,
+            image: {
+              select: { id: true, extension: true, path: true },
+            },
           },
         },
       },
@@ -133,6 +150,23 @@ class NotificationService {
         { isSeen: true }
       );
     }
+
+    list = list.map((item) => {
+      item.image = null;
+      if (item?.connectionSender && item.connectionSender?.image) {
+        item.image = `${urlPrefix}${item.connectionSender.image.path}`;
+        return item;
+      }
+      if (item?.groupAdder && item.groupAdder?.image) {
+        item.image = `${urlPrefix}${item.groupAdder.image.path}`;
+        return item;
+      }
+      if (item?.repliedPerson && item.repliedPerson?.image) {
+        item.image = `${urlPrefix}${item.repliedPerson.image.path}`;
+        return item;
+      }
+      return item;
+    });
 
     return {
       status: true,

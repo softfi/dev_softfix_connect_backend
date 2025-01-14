@@ -18,7 +18,7 @@ class SocketEventService {
 
   async addMemberInGroup(socket, data, eventName) {
     if (!("groupId" in data)) {
-      return this.#common.sendSocketResponse({
+      return this.#common.sendSocketResponse(socket, {
         status: false,
         event: eventName,
         message: "groupId not available",
@@ -27,7 +27,7 @@ class SocketEventService {
     }
 
     if (!("member" in data) || !Array.isArray(data.member)) {
-      return this.#common.sendSocketResponse({
+      return this.#common.sendSocketResponse(socket, {
         status: false,
         event: eventName,
         message: "member value is required in an array",
@@ -37,7 +37,7 @@ class SocketEventService {
 
     let userInfo = await this.#user.details({ uuid: socket.apiUser.uuid });
     if (!userInfo.status) {
-      return this.#common.sendSocketResponse({
+      return this.#common.sendSocketResponse(socket, {
         status: false,
         event: eventName,
         message: "Invalid user Id",
@@ -47,7 +47,7 @@ class SocketEventService {
 
     let groupInfo = await this.#group.details({ uuid: data?.groupId });
     if (!groupInfo.status) {
-      return this.#common.sendSocketResponse({
+      return this.#common.sendSocketResponse(socket, {
         status: false,
         event: eventName,
         message: "Invalid group id",
@@ -62,21 +62,34 @@ class SocketEventService {
     });
 
     if (!addMemberResult.status) {
-      return this.#common.sendSocketResponse({
-        status: true,
+      return this.#common.sendSocketResponse(socket, {
+        status: false,
         event: eventName,
         message: addMemberResult.msg,
         data: null,
       });
     }
 
-    // work to do here
+    this.#common.sendSocketResponse(socket, {
+      status: true,
+      event: eventName,
+      message: addMemberResult.msg,
+      data: null,
+    });
 
-    // const dataToSend = {
-    //   log: newLogEntry,
-    // };
-    // socket.emit("self-message-for-group", dataToSend);
-    // socket.to(data.roomId).emit("receive-message-from-group", dataToSend);
+    for (let member of addMemberResult.data) {
+      if (member?.socketId) {
+        const dataToSend = {
+          status: true,
+          msg: "Added in a group",
+          log: {
+            type: "GROUP",
+            data: null,
+          },
+        };
+        socket.to(member.socketId).emit("receive-notification", dataToSend);
+      }
+    }
   }
 
   async sendMessageInGroup(socket, data) {
@@ -178,8 +191,12 @@ class SocketEventService {
         unseen: unseenLogs.count + 1,
       });
 
-      socket.emit("group-list-updated", { status: true, log: null });
-
+      const urlPrefix = `http://${socket.handshake.headers.host}/public-uploads/`;
+      let data = {
+        urlPrefix,
+        search: "",
+      };
+      await this.#common.groupListUpdate(socket, data);
       // socket
       //   .to(data.roomId)
       //   .emit("group-list-updated", { status: true, log: null });
