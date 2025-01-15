@@ -19,8 +19,13 @@ const startSocket = tryCatch(async (app) => {
   });
 
   instrument(io, {
-    auth: false,
-    mode: "development",
+    // auth: false,
+    // mode: "development",
+    auth: {
+      type: "basic",
+      username: "admin",
+      password: "$2a$10$mqBWo5hR96V6REUDpvCD0.ODQS1xjSBRoYZD82PFOyA7flAIK4Xqq"
+    }
   });
 
   const socketServiceInstance = new SocketEventService(io);
