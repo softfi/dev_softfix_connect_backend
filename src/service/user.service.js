@@ -408,6 +408,7 @@ class UserService {
     userList = await Promise.all(
       userList.map(async (item) => {
         item.connectionStatus = null;
+        item.connectionId = null;
         const connectionInfo = await this.#connection.getDetails({
           where: {
             OR: [
@@ -425,6 +426,7 @@ class UserService {
 
         if (connectionInfo) {
           item.connectionStatus = connectionInfo.status;
+          item.connectionId = connectionInfo.id;
         }
 
         if (item?.image) {
