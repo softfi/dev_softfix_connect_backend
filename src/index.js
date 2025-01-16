@@ -26,8 +26,6 @@ app.get("/health-check", (req, res) => {
 /***************
   MIDDLEWARE 
 ****************/
-console.log(import.meta.dirname);
-
 app.use(
   "/socket-io-admin",
   express.static(

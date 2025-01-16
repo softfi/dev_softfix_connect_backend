@@ -667,6 +667,7 @@ class PersonalService {
             uuid: true,
             name: true,
             email: true,
+            socketId: true,
           },
         },
         to: {
@@ -675,6 +676,7 @@ class PersonalService {
             uuid: true,
             name: true,
             email: true,
+            socketId: true,
           },
         },
         repliedTo: {
@@ -715,6 +717,7 @@ class PersonalService {
         createdAt: true,
         editedAt: true,
         seenAt: true,
+        connectionId:true
       },
     });
 

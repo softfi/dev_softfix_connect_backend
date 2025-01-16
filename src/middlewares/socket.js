@@ -12,12 +12,19 @@ export const socketAuthentication = (socket, next) => {
       return;
     }
     let token = null;
+    const queryObj = socket?.handshake?.query;
 
-    if (APP_ENV === "development") {
-      token = authHandshake?.headers["authorization"];
-    } else {
-      token = authHandshake?.auth["authorization"];
+    if (!queryObj || !("token" in queryObj) || !queryObj.token) {
+      throw new Error("token not provided or Invalid token provided");
     }
+
+    token = queryObj.token;
+
+    // if (APP_ENV === "development") {
+    //   token = authHandshake?.headers["authorization"];
+    // } else {
+    //   token = authHandshake?.auth["authorization"];
+    // }
 
     if (!token) {
       console.log("Token not available!");
@@ -81,6 +88,7 @@ export const socketAuthentication = (socket, next) => {
     });
   } catch (err) {
     console.log(err);
-    return sendErrorResponse(res);
+    socket.disconnect();
+    return;
   }
 };

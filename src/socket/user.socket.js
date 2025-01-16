@@ -2,8 +2,8 @@ import BlockService from "../service/block.service.js";
 import ConnectionService from "../service/connection.service.js";
 import PersonalService from "../service/personal.service.js";
 import UserService from "../service/user.service.js";
-import { currentDateTimeIndian } from "../utils/helper.js";
 import CommonSocketService from "./common.socket.js";
+import { currentDateTimeIndian } from "../utils/helper.js";
 
 class UserSocketEventService {
   #connectionServiceInstance;
@@ -199,6 +199,7 @@ class UserSocketEventService {
     let receiverInfo = await this.#userServiceInstance.details({
       uuid: data.userUUID,
     });
+
     if (!receiverInfo.status) {
       throw new Error("Invalid userUUID");
     }
@@ -217,17 +218,18 @@ class UserSocketEventService {
         logId: data.msgId,
         isSeen: currentDateTimeIndian(new Date()),
       });
-    } else {
-      const urlPrefix = `http://${socket.handshake.headers.host}/public-uploads/`;
-      let data = {
-        urlPrefix,
-      };
-      await this.#commonSocketService.personalListUpdate({ socket, data });
-      // await this.socket.emit("personal-list-updated", {
-      //   status: true,
-      //   log: null,
-      // });
+
+      await this.#commonSocketService.personalMessageSeen(socket, {
+        data: personalLogInfo.data,
+        isSeen: currentDateTimeIndian(new Date()),
+      });
     }
+
+    const urlPrefix = `http://${socket.handshake.headers.host}/public-uploads/`;
+    let dataToSend = {
+      urlPrefix,
+    };
+    await this.#commonSocketService.personalListUpdate(socket, dataToSend);
   }
 
   async deletePersonalMessage(socket, data) {
