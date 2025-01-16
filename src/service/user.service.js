@@ -228,6 +228,7 @@ class UserService {
     isOnline,
     lastOnline,
     isActive,
+    profileImageStatus,
   }) {
     let userInfo = await this.#user.getDetails({
       where: { uuid, isDeleted: false },
@@ -251,10 +252,15 @@ class UserService {
     if (role) newData.roleId = role;
     if (password) newData.password = await hashPassword(password);
     if (socketId) newData.socketId = socketId;
-    if (profile) newData.imageId = profile;
     if (lastOnline) newData.lastOnline = lastOnline;
     if (isOnline === false || isOnline === true) newData.isOnline = isOnline;
     if (isActive === false || isActive === true) newData.isActive = isActive;
+
+    if (profileImageStatus) {
+      if (profile) newData.imageId = profile;
+    } else {
+      newData.imageId = null;
+    }
 
     await this.#user.update({ id: userInfo.id }, newData);
 

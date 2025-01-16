@@ -38,6 +38,11 @@ export const userUpdateValidator_v = [
   body("password").optional(),
   body("role").optional(),
   body("profile").optional(),
+  body("profileImageStatus")
+    .notEmpty()
+    .withMessage("profileImageStatus field is required")
+    .isBoolean()
+    .withMessage("profileImageStatus value should be boolean type"),
 ];
 
 export const groupCreateValidator_v = [

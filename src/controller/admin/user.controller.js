@@ -62,7 +62,16 @@ export const detailsUser = tryCatch(async (req, res) => {
 });
 
 export const updateUser = tryCatch(async (req, res) => {
-  let { id, name, email, password, role, profile, isActive } = req.body;
+  let {
+    id,
+    name,
+    email,
+    password,
+    role,
+    profile,
+    isActive,
+    profileImageStatus,
+  } = req.body;
 
   let result = await UserInstance.update({
     uuid: id,
@@ -71,6 +80,7 @@ export const updateUser = tryCatch(async (req, res) => {
     password,
     role,
     profile,
+    profileImageStatus,
     isActive: isActive === true || isActive === false ? isActive : null,
   });
   if (result.status) {
