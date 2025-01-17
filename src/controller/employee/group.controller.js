@@ -12,7 +12,7 @@ export const employeeGroupList = tryCatch(async (req, res) => {
   let result = await EmpGroupInstance.listByUser({
     apiUser: req.apiUser,
     search: req?.query?.search || "",
-    urlPrefix
+    urlPrefix,
   });
   if (result.status) {
     return sendResponseOk(res, result.msg, { data: result.data });
@@ -27,6 +27,9 @@ export const employeeGroupDetails = tryCatch(async (req, res) => {
     uuid: id,
   });
   if (result.status) {
+    let groupMemberInfo = await EmpGroupInstance.getMembers({
+      groupId: id,
+    });
     return sendResponseOk(res, result.msg, {
       data: {
         id: result.data?.id,
@@ -36,6 +39,7 @@ export const employeeGroupDetails = tryCatch(async (req, res) => {
         description: result.data?.description,
         maxUser: result.data?.maxUser,
         isActive: result.data?.isActive,
+        member: groupMemberInfo?.status ? groupMemberInfo?.data : [],
       },
     });
   } else {
