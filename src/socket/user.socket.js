@@ -173,6 +173,7 @@ class UserSocketEventService {
       log: newLogEntry,
     };
     socket.emit("self-message-in-personal", dataToSend);
+    await this.#commonSocketService.personalListUpdate(socket, { urlPrefix });
 
     if (receiverInfo?.data?.socketId) {
       socket
