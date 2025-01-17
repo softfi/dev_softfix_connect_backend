@@ -20,9 +20,6 @@ class CommonSocketService {
   }
 
   async personalListUpdate(socket, data) {
-    console.log("[][][][]][][][][][][");
-    console.log(socket.apiUser);
-    console.log("[][][][]][][][][][][");
     
     let result = await this.#personalInstance.getLogList({
       apiUser: socket.apiUser,
