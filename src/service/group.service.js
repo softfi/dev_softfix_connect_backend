@@ -591,7 +591,8 @@ class GroupService {
         if (lastMsg && lastMsg.length > 0) {
           item.lastMessage = lastMsg[0];
         }
-
+        item.group.totalMember = await this.groupMember.count({where:{groupId:item.group.id}});
+        
         if (item?.group?.icon) {
           item.group.icon.path = `${urlPrefix}${item.group.icon.path}`;
         }
