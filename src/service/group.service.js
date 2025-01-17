@@ -517,6 +517,7 @@ class GroupService {
     let filter = {
       userId: apiUser.id,
       group: {
+        isDeleted:false,
         name: {
           contains: search,
         },
