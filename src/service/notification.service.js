@@ -136,6 +136,9 @@ class NotificationService {
           },
         },
       },
+      orderBy:{
+        createdAt:"desc"
+      },
       skip: (page - 1) * count,
       take: count,
     });
