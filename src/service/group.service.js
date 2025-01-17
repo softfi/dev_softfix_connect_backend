@@ -591,8 +591,10 @@ class GroupService {
         if (lastMsg && lastMsg.length > 0) {
           item.lastMessage = lastMsg[0];
         }
-        item.group.totalMember = await this.groupMember.count({where:{groupId:item.group.id}});
-        
+        item.group.totalMember = await this.groupMember.count({
+          where: { groupId: item.group.id },
+        });
+
         if (item?.group?.icon) {
           item.group.icon.path = `${urlPrefix}${item.group.icon.path}`;
         }
@@ -614,6 +616,20 @@ class GroupService {
         }
       }
     }
+
+    return {
+      status: true,
+      msg: "Group list fetched successfully",
+      data: groupData,
+    };
+  }
+
+  async listByUserWithQuery({ apiUser, search, urlPrefix }) {
+    // let rawQuery = `SELECT gm.userId, gm.groupId, gm.addedAt, gm.unseen, g.uuid as groupUUID, g.name as groupName, g.isActive as groupIsActive, g.iconId as groupIconId, upl.extension as groupIconExtension, CONCAT('${urlPrefix}',upl.path) as groupIconPath, (SELECT CAST(COUNT(id) as CHAR) FROM Group_Member WHERE groupId = gm.groupId) as totalGroupMember, glog.id as lastMsg_Id, glog.fromId as lastMsg_FromId, glog.toId as lastMsg_ToId, glog.content as lastMsg_Content, glog.type as lastMsg_Type, glog.msgType as lastMsg_MsgType, glog.createdAt as lastMsg_CreatedAt FROM Group_Member gm LEFT JOIN \`Group\` g ON g.id = gm.groupId LEFT JOIN Uploads upl ON upl.id = g.iconId LEFT JOIN (SELECT gl.groupId, gl.id, gl.fromId, gl.toId, gl.content, gl.type, gl.msgType, gl.createdAt FROM Group_Logs gl WHERE isDeleted = 0 AND gl.id IN (SELECT MAX(id) FROM Group_Logs WHERE isDeleted = 0 GROUP BY groupId)) glog ON glog.groupId = gm.groupId WHERE gm.userId = ${apiUser.id} AND g.isDeleted = 0`;
+
+    let rawQuery = `SELECT gl.groupId, gl.id, gl.fromId, gl.toId, gl.content, gl.type, gl.msgType, gl.createdAt FROM Group_Logs gl WHERE isDeleted = 0 AND gl.id IN (SELECT MAX(id) FROM Group_Logs WHERE isDeleted = 0 GROUP BY groupId)`
+
+    let groupData = await this.groupMember.raw(rawQuery);
 
     return {
       status: true,

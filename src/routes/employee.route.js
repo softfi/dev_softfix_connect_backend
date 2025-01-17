@@ -18,6 +18,7 @@ import {
 import {
   employeeGroupDetails,
   employeeGroupList,
+  employeeGroupListWithQuery,
   employeeGroupLogDetails,
   employeeGroupLogs,
   employeeGroupMembers,
@@ -63,6 +64,7 @@ empAuthRoute.group("/profile", (empAuthRoute) => {
 /**************************** AUTHENTICATED ROUTES ****************************/
 empAuthRoute.group("/group", (empAuthRoute) => {
   empAuthRoute.get("/list", employeeGroupList);
+  empAuthRoute.get("/list-enhance", employeeGroupListWithQuery);
   empAuthRoute.get("/:id", employeeGroupDetails);
 
   empAuthRoute.group("/member", (empAuthRoute) => {

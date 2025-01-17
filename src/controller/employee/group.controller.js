@@ -21,6 +21,20 @@ export const employeeGroupList = tryCatch(async (req, res) => {
   }
 });
 
+export const employeeGroupListWithQuery = tryCatch(async (req, res) => {
+  const urlPrefix = `${req.protocol}://${req.headers.host}/public-uploads/`;
+  let result = await EmpGroupInstance.listByUserWithQuery({
+    apiUser: req.apiUser,
+    search: req?.query?.search || "",
+    urlPrefix,
+  });
+  if (result.status) {
+    return sendResponseOk(res, result.msg, { data: result.data });
+  } else {
+    return sendResponseBadReq(res, result.msg);
+  }
+});
+
 export const employeeGroupDetails = tryCatch(async (req, res) => {
   let { id } = req.params;
   let result = await EmpGroupInstance.details({
