@@ -20,10 +20,10 @@ class UserSocketEventService {
     this.io = io;
   }
 
-  async disconnection(socket) {
-    console.log("****************** DISCONNECT ******************");
+  async disconnection(socket, eventName) {
+    console.log(`****************** ${eventName} ******************`);
     console.log(socket?.apiUser);
-    console.log("****************** DISCONNECT ******************");
+    console.log(`****************** ${eventName} ******************`);
 
     await this.#userServiceInstance.update({
       uuid: socket?.apiUser?.uuid,
@@ -263,6 +263,28 @@ class UserSocketEventService {
           .emit("delete-message-in-personal", dataToSend);
       }
     }
+  }
+
+  async typingPersonalMessage(socket, data) {
+    if (data?.typingStatus !== true && data?.typingStatus !== false) {
+      throw new Error("typingStatus key should be a boolean value");
+    }
+
+    if (!data?.socketId) {
+      throw new Error("Provide a valid socketId");
+    }
+
+    const dataToSend = {
+      typingStatus: data?.typingStatus,
+      user: {
+        id: socket.apiUser.id,
+        uuid: socket.apiUser.uuid,
+        email: socket.apiUser.email,
+        socketId: socket.apiUser.socketId,
+      },
+    };
+
+    socket.to(data.socketId).emit("typing-in-personal-listen", dataToSend);
   }
 }
 

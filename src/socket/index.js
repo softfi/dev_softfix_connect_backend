@@ -7,9 +7,11 @@ import { printSocketConnection } from "../log/action.js";
 import { tryCatch } from "../utils/helper.js";
 import UserSocketEventService from "./user.socket.js";
 import { instrument } from "@socket.io/admin-ui";
+import CommonSocketService from "./common.socket.js";
 
 const userServiceInstance = new UserService();
 const groupServiceInstance = new GroupService();
+const commonSocketInstance = new CommonSocketService();
 
 const startSocket = tryCatch(async (app) => {
   const io = new Server(app, {
@@ -19,8 +21,6 @@ const startSocket = tryCatch(async (app) => {
   });
 
   instrument(io, {
-    // auth: false,
-    // mode: "development",
     auth: {
       type: "basic",
       username: "admin",
@@ -63,6 +63,8 @@ const startSocket = tryCatch(async (app) => {
       socket.join(groupInfo.group.uuid);
     }
 
+    await commonSocketInstance.userOnline(socket);
+
     io.engine.on("connection_error", (err) => {
       console.log("------x-------");
       console.log(err.code);
@@ -74,7 +76,15 @@ const startSocket = tryCatch(async (app) => {
     // printSocketConnection({ socket, currentUser });
 
     socket.on("disconnect", () => {
-      userSocketServiceInstance.disconnection(socket);
+      userSocketServiceInstance.disconnection(socket,"disconnect");
+    });
+
+    socket.on("offline", () => {
+      userSocketServiceInstance.disconnection(socket,"offline");
+    });
+
+    socket.on("typing-in-personal-emit", (data) => {
+      userSocketServiceInstance.typingPersonalMessage(socket,data);
     });
 
     socket.on("add-member-in-group", (data) =>
