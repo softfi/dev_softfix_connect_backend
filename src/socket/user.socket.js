@@ -30,6 +30,8 @@ class UserSocketEventService {
       isOnline: false,
       lastOnline: currentDateTimeIndian(new Date()),
     });
+
+    await this.#commonSocketService.userOnline(socket, false);
   }
 
   async sendConnectionRequest(socket, data) {
@@ -292,7 +294,6 @@ class UserSocketEventService {
           socketId: socket.apiUser.socketId,
         },
       };
-console.log(dataToSend);
 
       socket
         .to(userDetails.data.socketId)

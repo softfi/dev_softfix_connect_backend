@@ -24,8 +24,8 @@ const startSocket = tryCatch(async (app) => {
     auth: {
       type: "basic",
       username: "admin",
-      password: "$2a$10$mqBWo5hR96V6REUDpvCD0.ODQS1xjSBRoYZD82PFOyA7flAIK4Xqq"
-    }
+      password: "$2a$10$mqBWo5hR96V6REUDpvCD0.ODQS1xjSBRoYZD82PFOyA7flAIK4Xqq",
+    },
   });
 
   const socketServiceInstance = new SocketEventService(io);
@@ -63,7 +63,7 @@ const startSocket = tryCatch(async (app) => {
       socket.join(groupInfo.group.uuid);
     }
 
-    await commonSocketInstance.userOnline(socket);
+    await commonSocketInstance.userOnline(socket, true);
 
     io.engine.on("connection_error", (err) => {
       console.log("------x-------");
@@ -76,15 +76,15 @@ const startSocket = tryCatch(async (app) => {
     // printSocketConnection({ socket, currentUser });
 
     socket.on("disconnect", () => {
-      userSocketServiceInstance.disconnection(socket,"disconnect");
+      userSocketServiceInstance.disconnection(socket, "disconnect");
     });
 
     socket.on("offline", () => {
-      userSocketServiceInstance.disconnection(socket,"offline");
+      userSocketServiceInstance.disconnection(socket, "offline");
     });
 
     socket.on("typing-in-personal-emit", (data) => {
-      userSocketServiceInstance.typingPersonalMessage(socket,data);
+      userSocketServiceInstance.typingPersonalMessage(socket, data);
     });
 
     socket.on("add-member-in-group", (data) =>

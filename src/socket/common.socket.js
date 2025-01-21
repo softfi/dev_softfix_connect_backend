@@ -75,7 +75,7 @@ class CommonSocketService {
     socket.emit("group-list-updated", dataToSend);
   }
 
-  async userOnline(socket) {
+  async userOnline(socket, onlineStatus = true) {
     const rawQuery = `SELECT usr.id, usr.uuid, usr.name, usr.email, usr.socketId, usr.isOnline FROM Connections con LEFT JOIN User usr ON usr.id = (CASE WHEN con.userId1 = ${socket.apiUser.id} THEN con.userId2 ELSE con.userId1 END) WHERE (con.userId1 = ${socket.apiUser.id} OR con.userId2 = ${socket.apiUser.id}) AND con.status = 'ACTIVE' AND usr.isDeleted = 0`;
 
     let connection = await this.#connectionInstance.raw(rawQuery);
@@ -84,8 +84,13 @@ class CommonSocketService {
       for (const usr of connection) {
         if (usr && usr.isOnline && usr?.socketId) {
           const dataToSend = {
-            onlineStatus: true,
-            user: usr,
+            onlineStatus: onlineStatus,
+            user: {
+              id: socket.apiUser.id,
+              uuid: socket.apiUser.uuid,
+              email: socket.apiUser.email,
+              socketId: socket.apiUser.socketId,
+            },
           };
           socket.to(usr.socketId).emit("user-online", dataToSend);
         }
