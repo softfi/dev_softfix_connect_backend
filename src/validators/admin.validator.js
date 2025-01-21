@@ -37,6 +37,7 @@ export const userUpdateValidator_v = [
   body("email").optional().isEmail().withMessage("invalid email format"),
   body("password").optional(),
   body("role").optional(),
+  body("isActive").optional(),
   body("profile").optional(),
   body("profileImageStatus")
     .notEmpty()

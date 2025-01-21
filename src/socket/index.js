@@ -79,8 +79,8 @@ const startSocket = tryCatch(async (app) => {
       userSocketServiceInstance.disconnection(socket, "disconnect");
     });
 
-    socket.on("offline", () => {
-      userSocketServiceInstance.disconnection(socket, "offline");
+    socket.on("on_off_status", (data) => {
+      userSocketServiceInstance.on_offStatus(socket, data);
     });
 
     socket.on("typing-in-personal-emit", (data) => {

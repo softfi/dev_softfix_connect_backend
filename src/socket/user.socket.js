@@ -34,6 +34,18 @@ class UserSocketEventService {
     await this.#commonSocketService.userOnline(socket, false);
   }
 
+  async on_offStatus(socket, data) {
+    if (data?.status !== true && data?.status !== false) {
+      throw new Error("status value should be a boolean");
+    }
+
+    if (data.status) {
+      await this.#commonSocketService.userOnline(socket, true);
+    } else {
+      await this.disconnection(socket, "offline");
+    }
+  }
+
   async sendConnectionRequest(socket, data) {
     let result = await this.#connectionServiceInstance.sendConnectionReq({
       apiUser: socket.apiUser,
