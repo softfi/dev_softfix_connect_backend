@@ -31,6 +31,11 @@ export const userListValidator_v = [
   body("isActive").optional(),
 ];
 
+export const passwordChangeValidator_v = [
+  body("oldPass").notEmpty().withMessage("oldPass field is required"),
+  body("newPass").notEmpty().withMessage("newPass field is required"),
+];
+
 export const userUpdateValidator_v = [
   body("id").notEmpty().withMessage("id field is required"),
   body("name").optional(),

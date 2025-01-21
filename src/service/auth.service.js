@@ -1,4 +1,4 @@
-import { getJwtToken, matchPassword } from "../utils/helper.js";
+import { getJwtToken, hashPassword, matchPassword } from "../utils/helper.js";
 import QueryService from "./database/query.service.js";
 
 class AuthService {
@@ -99,6 +99,37 @@ class AuthService {
     return {
       status: true,
       msg: "Profile image removed successfully!",
+    };
+  }
+
+  async changePassword({ apiUser, oldPass, newPass }) {
+    let profileInfo = await this.user.getDetails({
+      where: { id: apiUser.id, isDeleted: false },
+    });
+
+    if (!profileInfo) {
+      return {
+        status: false,
+        msg: "Invalid profile!",
+      };
+    }
+
+    let matchPass = await matchPassword(oldPass, profileInfo.password);
+    if (!matchPass) {
+      return {
+        status: false,
+        msg: "Incorrect old password",
+      };
+    }
+
+    await this.user.update(
+      { id: apiUser.id },
+      { password: await hashPassword(newPass) }
+    );
+
+    return {
+      status: true,
+      msg: "Password updated successfully!",
     };
   }
 }

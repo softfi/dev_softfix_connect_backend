@@ -1,13 +1,18 @@
 import express from "express";
 import "express-group-routes";
 
-import { adminLogin, adminProfile } from "../controller/admin/auth.controller.js";
+import {
+  adminChangePassword,
+  adminLogin,
+  adminProfile,
+} from "../controller/admin/auth.controller.js";
 import {
   groupAddMemberValidator_v,
   groupCreateValidator_v,
   groupListValidator_v,
   groupUpdateValidator_v,
   loginValidator_v,
+  passwordChangeValidator_v,
   removeSchedulePermsValidator_v,
   updateSchedulePermsValidator_v,
   updateScheduleValidator_v,
@@ -56,6 +61,12 @@ adminRoute.group("/auth", (adminRoute) => {
 /**************************** AUTHENTICATED ROUTES ****************************/
 adminAuthRoute.group("/profile", (adminAuthRoute) => {
   adminAuthRoute.get("/", adminProfile);
+  adminAuthRoute.put(
+    "/change-password",
+    passwordChangeValidator_v,
+    bodyValidator,
+    adminChangePassword
+  );
 });
 
 adminAuthRoute.group("/role", (adminAuthRoute) => {
@@ -104,7 +115,12 @@ adminAuthRoute.group("/group", (adminAuthRoute) => {
       removeMemberToGroup
     );
     adminAuthRoute.get("/:id", getMemberFromGroup);
-    adminAuthRoute.post("/not-in-group", userListValidator_v, bodyValidator, memberNotInGroup);
+    adminAuthRoute.post(
+      "/not-in-group",
+      userListValidator_v,
+      bodyValidator,
+      memberNotInGroup
+    );
   });
 });
 
@@ -124,7 +140,12 @@ adminAuthRoute.group("/schedule", (adminAuthRoute) => {
       bodyValidator,
       addSchedulePerms
     );
-    adminAuthRoute.post("/get-user-with-perms", userListValidator_v, bodyValidator, getUserWithPerms);
+    adminAuthRoute.post(
+      "/get-user-with-perms",
+      userListValidator_v,
+      bodyValidator,
+      getUserWithPerms
+    );
     adminAuthRoute.get("/get/:userId", getSchedulePerms);
     adminAuthRoute.post(
       "/remove",
