@@ -21,3 +21,18 @@ export const adminLogin = tryCatch(async (req, res) => {
     return sendResponseBadReq(res, result.msg);
   }
 });
+
+export const adminProfile = tryCatch(async (req, res) => {
+  let result = await AdminAuthInstance.profile({
+    apiUser: req.apiUser,
+  });
+  if (result.status) {
+    if(result?.data && result?.data?.image && result?.data?.image?.path){
+      const urlPrefix = `${req.protocol}://${req.headers.host}/public-uploads/`;
+      result.data.image.path = urlPrefix + result?.data?.image?.path;
+    }
+    return sendResponseOk(res, result.msg, { data: result.data });
+  } else {
+    return sendResponseBadReq(res, result.msg);
+  }
+});

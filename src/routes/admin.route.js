@@ -1,7 +1,7 @@
 import express from "express";
 import "express-group-routes";
 
-import { adminLogin } from "../controller/admin/auth.controller.js";
+import { adminLogin, adminProfile } from "../controller/admin/auth.controller.js";
 import {
   groupAddMemberValidator_v,
   groupCreateValidator_v,
@@ -54,6 +54,10 @@ adminRoute.group("/auth", (adminRoute) => {
 });
 
 /**************************** AUTHENTICATED ROUTES ****************************/
+adminAuthRoute.group("/profile", (adminAuthRoute) => {
+  adminAuthRoute.get("/", adminProfile);
+});
+
 adminAuthRoute.group("/role", (adminAuthRoute) => {
   adminAuthRoute.get("/", roleList);
 });
