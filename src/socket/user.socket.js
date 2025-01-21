@@ -270,21 +270,34 @@ class UserSocketEventService {
       throw new Error("typingStatus key should be a boolean value");
     }
 
-    if (!data?.socketId) {
-      throw new Error("Provide a valid socketId");
+    if (!data?.uuid) {
+      throw new Error("Provide a valid uuid");
     }
 
-    const dataToSend = {
-      typingStatus: data?.typingStatus,
-      user: {
-        id: socket.apiUser.id,
-        uuid: socket.apiUser.uuid,
-        email: socket.apiUser.email,
-        socketId: socket.apiUser.socketId,
-      },
-    };
+    let userDetails = await this.#userServiceInstance.details({
+      uuid: data?.uuid,
+    });
 
-    socket.to(data.socketId).emit("typing-in-personal-listen", dataToSend);
+    if (!userDetails.status) {
+      throw new Error(userDetails.msg);
+    }
+
+    if (userDetails?.data?.isOnline && userDetails?.data?.socketId) {
+      const dataToSend = {
+        typingStatus: data?.typingStatus,
+        user: {
+          id: socket.apiUser.id,
+          uuid: socket.apiUser.uuid,
+          email: socket.apiUser.email,
+          socketId: socket.apiUser.socketId,
+        },
+      };
+console.log(dataToSend);
+
+      socket
+        .to(userDetails.data.socketId)
+        .emit("typing-in-personal-listen", dataToSend);
+    }
   }
 }
 
