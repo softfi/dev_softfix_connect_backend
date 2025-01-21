@@ -175,6 +175,9 @@ export const employeePersonalLogDetails = tryCatch(async (req, res) => {
         if (item?.file) {
           item.file.path = urlPrefix + item.file?.path;
         }
+        if (item?.repliedTo && item?.repliedTo?.file && item?.repliedTo?.file?.path) {
+          item.repliedTo.file.path = urlPrefix + item.repliedTo.file.path;
+        }
         return item;
       }),
       totalCount: result.count,
