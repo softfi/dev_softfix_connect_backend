@@ -94,6 +94,14 @@ export const employeeGroupLogs = tryCatch(async (req, res) => {
         if (item?.file) {
           item.file.path = urlPrefix + item.file?.path;
         }
+
+        if(item?.from && item?.from?.image && item?.from.image.path){
+          item.from.image.path = urlPrefix + item?.from.image.path;
+        }
+
+        if(item?.to && item?.to?.image && item?.to.image.path){
+          item.to.image.path = urlPrefix + item?.to.image.path;
+        }
         return item;
       }),
       totalCount: result.totalCount,
