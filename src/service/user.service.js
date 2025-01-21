@@ -394,6 +394,8 @@ class UserService {
             name: true,
           },
         },
+        isOnline: true,
+        lastOnline: true,
         createdAt: true,
         updatedAt: true,
       },
