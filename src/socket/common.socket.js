@@ -50,8 +50,6 @@ class CommonSocketService {
       message: "Message seen",
       log: data?.data || null,
     };
-console.log(dataToSend);
-console.log("909090909090009090");
 
     if (data?.data?.from?.isOnline && data?.data?.from?.socketId) {
       socket

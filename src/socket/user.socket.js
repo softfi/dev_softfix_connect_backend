@@ -96,10 +96,10 @@ class UserSocketEventService {
       totalCount: result.count,
     });
 
-    for(let obj of result.unread){
-        await this.#commonSocketService.personalMessageSeen(socket, {
-          data: obj
-        });
+    for (let obj of result.unread) {
+      await this.#commonSocketService.personalMessageSeen(socket, {
+        data: obj,
+      });
     }
   }
 
@@ -268,12 +268,14 @@ class UserSocketEventService {
       throw new Error("Socket id not available");
     }
 
-    let receiverInfo = await this.#userServiceInstance.details({
-      uuid: data.userUUID,
-    });
+    if (data.userUUID) {
+      let receiverInfo = await this.#userServiceInstance.details({
+        uuid: data.userUUID,
+      });
 
-    if (!receiverInfo.status) {
-      throw new Error("Invalid userUUID");
+      if (!receiverInfo.status) {
+        throw new Error("Invalid userUUID");
+      }
     }
 
     let personalLogInfo =
@@ -292,7 +294,7 @@ class UserSocketEventService {
       });
 
       await this.#commonSocketService.personalMessageSeen(socket, {
-        data: personalLogInfo.data
+        data: personalLogInfo.data,
       });
     }
 
