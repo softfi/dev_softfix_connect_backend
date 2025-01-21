@@ -691,6 +691,7 @@ class GroupService {
         },
         repliedTo: {
           select: {
+            id:true,
             from: {
               select: {
                 id: true,
