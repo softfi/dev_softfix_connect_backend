@@ -1,15 +1,18 @@
 import QueryService from "../service/database/query.service.js";
 import GroupService from "../service/group.service.js";
 import PersonalService from "../service/personal.service.js";
+import UserService from "../service/user.service.js";
 
 class CommonSocketService {
   #personalInstance;
   #groupInstance;
   #connectionInstance;
+  #userInstance;
   constructor() {
     this.#personalInstance = new PersonalService();
     this.#groupInstance = new GroupService();
     this.#connectionInstance = new QueryService("Connections");
+    this.#userInstance = new UserService();
   }
 
   async sendSocketResponse(socket, { status, event, message, data }) {
@@ -48,9 +51,9 @@ class CommonSocketService {
       log: data?.data || null,
     };
 
-    if (data?.data?.to?.socketId) {
+    if (data?.data?.from?.socketId) {
       socket
-        .to(data.data.to.socketId)
+        .to(data.data.from.socketId)
         .emit("personal-message-seen", dataToSend);
     }
   }
@@ -80,16 +83,21 @@ class CommonSocketService {
 
     let connection = await this.#connectionInstance.raw(rawQuery);
 
+    let userInfo = await this.#userInstance.details({
+      uuid: socket.apiUser.uuid,
+    });
+
     if (connection) {
       for (const usr of connection) {
         if (usr && usr.isOnline && usr?.socketId) {
           const dataToSend = {
             onlineStatus: onlineStatus,
             user: {
-              id: socket.apiUser.id,
-              uuid: socket.apiUser.uuid,
-              email: socket.apiUser.email,
-              socketId: socket.apiUser.socketId,
+              id: userInfo.data.id,
+              uuid: userInfo.data.uuid,
+              email: userInfo.data.email,
+              socketId: userInfo.data.socketId,
+              lastOnline: userInfo.data.lastOnline,
             },
           };
           socket.to(usr.socketId).emit("user-online", dataToSend);
