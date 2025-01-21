@@ -46,6 +46,63 @@ class UserSocketEventService {
     }
   }
 
+  async getLogDetails(socket, data = {}, eventName) {
+    let { connectionId, page, count, all, markSeen } = data;
+
+    if (!connectionId) {
+      return this.#commonSocketService.sendSocketResponse(socket, {
+        status: false,
+        event: eventName,
+        message: "connectionId not available or invalid connectionId",
+        data: null,
+      });
+    }
+
+    let result = await this.#personalServiceInstance.getLogDetails({
+      apiUser: socket.apiUser,
+      connectionId,
+      page: Number(page) || 1,
+      count: Number(count) || 100,
+      all: all ?? false,
+      markSeen: markSeen === true || markSeen === false ? markSeen : null,
+    });
+
+    if (!result.status) {
+      return this.#commonSocketService.sendSocketResponse(socket, {
+        status: false,
+        event: eventName,
+        message: result.msg,
+        data: null,
+      });
+    }
+
+    const urlPrefix = `http://${socket.handshake.headers.host}/public-uploads/`;
+    socket.emit("get-log-details-listen", {
+      status: true,
+      msg: result.msg,
+      data: result.data.map((item) => {
+        if (item?.file) {
+          item.file.path = urlPrefix + item.file?.path;
+        }
+        if (
+          item?.repliedTo &&
+          item?.repliedTo?.file &&
+          item?.repliedTo?.file?.path
+        ) {
+          item.repliedTo.file.path = urlPrefix + item.repliedTo.file.path;
+        }
+        return item;
+      }),
+      totalCount: result.count,
+    });
+
+    for(let obj of result.unread){
+        await this.#commonSocketService.personalMessageSeen(socket, {
+          data: obj
+        });
+    }
+  }
+
   async sendConnectionRequest(socket, data) {
     let result = await this.#connectionServiceInstance.sendConnectionReq({
       apiUser: socket.apiUser,
@@ -235,8 +292,7 @@ class UserSocketEventService {
       });
 
       await this.#commonSocketService.personalMessageSeen(socket, {
-        data: personalLogInfo.data,
-        isSeen: currentDateTimeIndian(new Date()),
+        data: personalLogInfo.data
       });
     }
 

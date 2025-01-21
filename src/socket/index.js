@@ -83,6 +83,10 @@ const startSocket = tryCatch(async (app) => {
       userSocketServiceInstance.on_offStatus(socket, data);
     });
 
+    socket.on("get-log-details-emit", (data) => {
+      userSocketServiceInstance.getLogDetails(socket, data, "get-log-details-emit");
+    });
+
     socket.on("typing-in-personal-emit", (data) => {
       userSocketServiceInstance.typingPersonalMessage(socket, data);
     });
