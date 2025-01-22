@@ -3,6 +3,7 @@ import "express-group-routes";
 
 import {
   adminChangePassword,
+  adminDashBoard,
   adminLogin,
   adminProfile,
 } from "../controller/admin/auth.controller.js";
@@ -59,6 +60,8 @@ adminRoute.group("/auth", (adminRoute) => {
 });
 
 /**************************** AUTHENTICATED ROUTES ****************************/
+adminAuthRoute.get("/dashboard", adminDashBoard);
+
 adminAuthRoute.group("/profile", (adminAuthRoute) => {
   adminAuthRoute.get("/", adminProfile);
   adminAuthRoute.put(

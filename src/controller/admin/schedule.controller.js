@@ -80,10 +80,16 @@ export const removeSchedulePerms = tryCatch(async (req, res) => {
 export const getUserWithPerms = tryCatch(async (req, res) => {
   let { page, count, search } = req.body;
 
+  const urlPrefix = `${req.protocol}://${req.headers.host}/public-uploads/`;
+console.log("pppppppppppoooooopppppppppppp");
+console.log(urlPrefix);
+console.log("zzzzzzzzzzoooooozzzzzzzzzz");
+
   let result = await UserInstance.listWithPerms({
     page: Number(page) || 1,
     count: Number(count) || 10,
     search: search || "",
+    urlPrefix
   });
   if (result.status) {
     return sendResponseOk(res, result.msg, {
