@@ -190,7 +190,16 @@ class GroupService {
     };
   }
 
-  async update({ apiUser, uuid, name, description, isActive, code, icon }) {
+  async update({
+    apiUser,
+    uuid,
+    name,
+    description,
+    isActive,
+    code,
+    icon,
+    iconImageStatus,
+  }) {
     let userInfo = await this.group.getDetails({
       where: { uuid, isDeleted: false },
     });
@@ -211,7 +220,9 @@ class GroupService {
       newData.name = name;
     }
 
-    if (icon) newData.iconId = icon;
+    if(iconImageStatus === true){
+      if (icon || icon === null) newData.iconId = icon;
+    }
     if (description) newData.description = description;
     if (isActive === true || isActive === false) newData.isActive = isActive;
 
@@ -691,7 +702,7 @@ class GroupService {
         },
         repliedTo: {
           select: {
-            id:true,
+            id: true,
             from: {
               select: {
                 id: true,

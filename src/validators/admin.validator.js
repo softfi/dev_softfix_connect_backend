@@ -84,6 +84,11 @@ export const groupUpdateValidator_v = [
     .withMessage("isActive field value should be in boolean format"),
   body("code").optional(),
   body("icon").optional(),
+  body("iconImageStatus")
+  .notEmpty()
+  .withMessage("iconImageStatus field is required")
+  .isBoolean()
+  .withMessage("iconImageStatus value should be boolean type"),
 ];
 
 export const groupAddMemberValidator_v = [

@@ -65,7 +65,8 @@ export const detailsGroup = tryCatch(async (req, res) => {
 });
 
 export const updateGroup = tryCatch(async (req, res) => {
-  let { id, name, description, isActive, code, icon } = req.body;
+  let { id, name, description, isActive, code, icon, iconImageStatus } =
+    req.body;
 
   let result = await GroupInstance.update({
     apiUser: req.apiUser,
@@ -75,6 +76,7 @@ export const updateGroup = tryCatch(async (req, res) => {
     isActive,
     code,
     icon,
+    iconImageStatus,
   });
   if (result.status) {
     return sendResponseCreated(res, result.msg);

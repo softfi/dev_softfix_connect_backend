@@ -257,7 +257,7 @@ class UserService {
     if (isActive === false || isActive === true) newData.isActive = isActive;
 
     if (profileImageStatus === true) {
-      if (profile) newData.imageId = profile;
+      if (profile || profile === null) newData.imageId = profile;
     }
 
     await this.#user.update({ id: userInfo.id }, newData);
