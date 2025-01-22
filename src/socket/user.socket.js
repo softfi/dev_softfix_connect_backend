@@ -97,6 +97,7 @@ class UserSocketEventService {
     });
 
     for (let obj of result.unread) {
+      obj.seenAt = currentDateTimeIndian(new Date());
       await this.#commonSocketService.personalMessageSeen(socket, {
         data: obj,
       });
@@ -292,6 +293,8 @@ class UserSocketEventService {
         logId: data.msgId,
         isSeen: currentDateTimeIndian(new Date()),
       });
+
+      personalLogInfo.data.seenAt = currentDateTimeIndian(new Date());
 
       await this.#commonSocketService.personalMessageSeen(socket, {
         data: personalLogInfo.data,

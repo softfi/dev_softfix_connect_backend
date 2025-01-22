@@ -3,9 +3,11 @@ import cors from "cors";
 import morgan from "morgan";
 import fileUpload from "express-fileupload";
 import http from "http";
+import https from "https";
+import { readFileSync } from "fs";
 
 import databaseConnection from "./config/database.js";
-import { PORT } from "./config/config.js";
+import { APP_ENV, PORT } from "./config/config.js";
 import api from "./routes/index.js";
 import startSocket from "./socket/index.js";
 import { join } from "path";
@@ -51,16 +53,40 @@ app.all("*", (req, res) => {
   return res.status(404).send({ status: false, msg: "Not Found" });
 });
 
-const httpServer = http.createServer(app);
+// const httpServer = http.createServer(app);
+
+/*********************
+    SSL CERTIFICATE 
+**********************/
+
+// const privateKey = readFileSync("./ssl/credentials/privatekey.pem", "utf8");
+// const certificate = readFileSync("./ssl/credentials/cert.pem", "utf8");
+// const chain = readFileSync("./ssl/credentials/chain.pem", "utf8");
+
+// const credentials = {
+//   key: privateKey,
+//   cert: certificate,
+//   ca: chain,
+// };
+
+// let serverInstance = null;
+
+// if (APP_ENV === "production") {
+//   serverInstance = https.createServer(credentials, app);
+// } else {
+//   serverInstance = http.createServer(app);
+// }
+
+let serverInstance = http.createServer(app);
 
 /***************************
           SOCKET 
 ****************************/
-await startSocket(httpServer);
+await startSocket(serverInstance);
 
 /***************************
   APPLICATION  SERVERS 
 ****************************/
-httpServer.listen(PORT, () => {
+serverInstance.listen(PORT, () => {
   console.log(`Softfix Connect server is running at PORT ${PORT}`);
 });
