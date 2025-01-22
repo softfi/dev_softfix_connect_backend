@@ -325,8 +325,8 @@ class UserService {
     };
   }
 
-  async listWithPerms({ page, count, search }) {
-    const rawQuery = `SELECT user.id,user.uuid,user.name,user.email,user.roleId,user.createdAt,user.updatedAt, user.alwaysOpenSchedule, role.strongId, role.name as roleName, ssp.expireTime FROM User user LEFT JOIN Role role on user.roleId = role.id LEFT JOIN (SELECT * FROM Special_Schedule_Permission WHERE expireTime > CURRENT_TIMESTAMP()) ssp on ssp.userId = user.id WHERE role.strongId > 2 AND user.isDeleted = 0 AND (user.name LIKE CONCAT('%', '${search}', '%') OR user.email LIKE CONCAT('%', '${search}', '%')) ORDER BY ssp.expireTime DESC LIMIT ${count} OFFSET ${
+  async listWithPerms({ page, count, search, urlPrefix }) {
+    const rawQuery = `SELECT user.id,user.uuid,user.name,user.email,user.roleId,user.createdAt,user.updatedAt, user.alwaysOpenSchedule, role.strongId, role.name as roleName,upl.extension as imageExtension, CONCAT('${urlPrefix}',upl.path) as imagePath,  ssp.expireTime FROM User user LEFT JOIN Role role on user.roleId = role.id LEFT JOIN Uploads upl on upl.id = user.imageId LEFT JOIN (SELECT * FROM Special_Schedule_Permission WHERE expireTime > CURRENT_TIMESTAMP()) ssp on ssp.userId = user.id WHERE role.strongId > 2 AND user.isDeleted = 0 AND (user.name LIKE CONCAT('%', '${search}', '%') OR user.email LIKE CONCAT('%', '${search}', '%')) ORDER BY ssp.expireTime DESC LIMIT ${count} OFFSET ${
       (page - 1) * count
     }`;
 
