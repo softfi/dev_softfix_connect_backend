@@ -15,7 +15,7 @@ export const timingAuthentication = async (req, res, next) => {
       return sendResponseWithoutData(res, 401, false, "Unauthorized");
     }
     let currentDateTime = null;
-    if (APP_ENV === "development") {
+    if (APP_ENV === "local") {
       currentDateTime = new Date();
     } else {
       currentDateTime = currentDateTimeIndian(new Date());
