@@ -57,4 +57,4 @@ export const scheduleDefaultData = [
 
 export const notificationType = ["CONNECTION_REQUEST", "GROUP"];
 
-export const maxSizeToUploadFile = 50;
+export const maxSizeToUploadFile = 500;

@@ -40,6 +40,7 @@ app.use(
   fileUpload({
     abortOnLimit: true,
     limits: { fileSize: maxSizeToUploadFile * 1024 * 1024 },
+    uploadTimeout: 0,
   })
 );
 // app.use(morgan("dev"));
