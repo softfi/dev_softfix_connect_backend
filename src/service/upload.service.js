@@ -1,7 +1,13 @@
 import { join } from "path";
 import { readdir, mkdir } from "fs/promises";
 import QueryService from "./database/query.service.js";
-import { generateRandomString, hashPassword, removeSpace } from "../utils/helper.js";
+import {
+  bytesToMB,
+  generateRandomString,
+  hashPassword,
+  removeSpace,
+} from "../utils/helper.js";
+import { maxSizeToUploadFile } from "../utils/constants.js";
 
 class UploadService {
   #user;
@@ -75,6 +81,13 @@ class UploadService {
 
     let result = [];
     for (let file of fileArray) {
+      if (bytesToMB(file.size) > maxSizeToUploadFile) {
+        return {
+          status: false,
+          msg: `The file upload failed because the file size exceeds the maximum allowed limit of ${maxSizeToUploadFile} MB`,
+        };
+      }
+
       let fileName =
         file.name.slice(0, file.name.lastIndexOf(".")) +
         "-" +

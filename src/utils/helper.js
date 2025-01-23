@@ -198,6 +198,9 @@ export const compareTime = (start, end) => {
 export const currentDateTimeIndian = (date) =>
   new Date(date.getTime() + (5 * 60 + 30) * 60 * 1000);
 
+export const bytesToMB = (sizeInBytes) =>
+  Number((Number(sizeInBytes) / (1024 * 1024)).toFixed(2));
+
 // export const generateUUID = () => {
 //   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
 //     const r = (Math.random() * 16) | 0;

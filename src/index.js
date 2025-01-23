@@ -11,6 +11,7 @@ import { APP_ENV, PORT } from "./config/config.js";
 import api from "./routes/index.js";
 import startSocket from "./socket/index.js";
 import { join } from "path";
+import { maxSizeToUploadFile } from "./utils/constants.js";
 
 const app = express();
 databaseConnection();
@@ -35,11 +36,15 @@ app.use(
   )
 );
 
-app.use(fileUpload());
+app.use(
+  fileUpload({
+    abortOnLimit: true,
+    limits: { fileSize: maxSizeToUploadFile * 1024 * 1024 },
+  })
+);
 // app.use(morgan("dev"));
 app.use(cors({ origin: "*", credentials: true }));
-app.use(express.json());
-app.use(express.urlencoded({ limit: "500mb", extended: true }));
+app.use(express.json({ limit: 5 * 1024 * 1024 }));
 app.use(
   "/public-uploads",
   express.static(join(import.meta.dirname, "../public/uploads"))
