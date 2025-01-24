@@ -65,19 +65,18 @@ const httpServer = http.createServer(app);
     SSL CERTIFICATE 
 **********************/
 
-const privateKey = readFileSync("./ssl/privateKey.pem", "utf8");
-const certificate = readFileSync("./ssl/cert.pem", "utf8");
-const chain = readFileSync("./ssl/chain.pem", "utf8");
-
-const credentials = {
-  key: privateKey,
-  cert: certificate,
-  ca: chain,
-};
-
 let serverInstance = null;
 
 if (APP_ENV === "production" || APP_ENV === "development") {
+  const privateKey = readFileSync("./ssl/privateKey.pem", "utf8");
+  const certificate = readFileSync("./ssl/cert.pem", "utf8");
+  const chain = readFileSync("./ssl/chain.pem", "utf8");
+
+  const credentials = {
+    key: privateKey,
+    cert: certificate,
+    ca: chain,
+  };
   serverInstance = https.createServer(credentials, app);
 } else {
   serverInstance = http.createServer(app);
