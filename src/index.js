@@ -59,7 +59,7 @@ app.all("*", (req, res) => {
   return res.status(404).send({ status: false, msg: "Not Found" });
 });
 
-const httpServer = http.createServer(app);
+// const httpServer = http.createServer(app);
 
 /*********************
     SSL CERTIFICATE 
@@ -67,7 +67,8 @@ const httpServer = http.createServer(app);
 
 let serverInstance = null;
 
-if (APP_ENV === "production" || APP_ENV === "development") {
+// if (APP_ENV === "production" || APP_ENV === "development") {
+if (APP_ENV === "production") {
   const privateKey = readFileSync("./ssl/privateKey.pem", "utf8");
   const certificate = readFileSync("./ssl/cert.pem", "utf8");
   const chain = readFileSync("./ssl/chain.pem", "utf8");

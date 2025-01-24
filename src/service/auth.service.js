@@ -15,6 +15,7 @@ class AuthService {
         name: true,
         email: true,
         password: true,
+        isActive: true,
         role: { select: { id: true, name: true } },
       },
     });
@@ -29,7 +30,12 @@ class AuthService {
         return { status: false, msg: "Cannot authorize from this side" };
       }
       const token = getJwtToken({ id: usernameInfo.id });
-      return { status: true, msg: "Logged in successfully!", data: token };
+      return {
+        status: true,
+        msg: "Logged in successfully!",
+        data: token,
+        isVerified: usernameInfo.isActive,
+      };
     } else {
       return { status: false, msg: "Invalid password" };
     }

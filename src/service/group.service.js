@@ -220,7 +220,7 @@ class GroupService {
       newData.name = name;
     }
 
-    if(iconImageStatus === true){
+    if (iconImageStatus === true) {
       if (icon || icon === null) newData.iconId = icon;
     }
     if (description) newData.description = description;
@@ -636,7 +636,7 @@ class GroupService {
   }
 
   async listByUserWithQuery({ apiUser, search, urlPrefix }) {
-    let rawQuery = `SELECT gm.userId, gm.groupId, gm.addedAt, gm.unseen, g.uuid as groupUUID, g.name as groupName, g.isActive as groupIsActive, CONCAT('${urlPrefix}',upl.path) as groupIconPath, (SELECT CAST(COUNT(id) as CHAR) FROM Group_Member WHERE groupId = gm.groupId) as totalGroupMember, glog.id as lastMsg_Id, glog.fromId as lastMsg_FromId, glog.fromName as lastMsg_FromName, glog.fromEmail as lastMsg_FromEmail, glog.toId as lastMsg_ToId, glog.toName as lastMsg_ToName, glog.toEmail as lastMsg_ToEmail, glog.content as lastMsg_Content, glog.type as lastMsg_Type, glog.msgType as lastMsg_MsgType, glog.createdAt as lastMsg_CreatedAt FROM Group_Member gm LEFT JOIN \`Group\` g ON g.id = gm.groupId LEFT JOIN Uploads upl ON upl.id = g.iconId LEFT JOIN (SELECT gl.groupId, gl.id, gl.fromId, gl.toId, gl.content, gl.type, gl.msgType, gl.createdAt, u1.name as fromName, u1.email as fromEmail, u2.name as toName, u2.email as toEmail FROM Group_Logs gl LEFT JOIN User u1 ON u1.id = gl.fromId LEFT JOIN User u2 ON u2.id = gl.toId WHERE gl.isDeleted = 0 AND gl.id IN (SELECT MAX(id) FROM Group_Logs WHERE isDeleted = 0 GROUP BY groupId)) glog ON glog.groupId = gm.groupId WHERE gm.userId = ${apiUser.id} AND g.isDeleted = 0 ORDER BY glog.createdAt DESC`;
+    let rawQuery = `SELECT gm.userId, gm.groupId, gm.addedAt, gm.unseen, g.uuid as groupUUID, g.name as groupName, g.isActive as groupIsActive, CONCAT('${urlPrefix}',upl.path) as groupIconPath, (SELECT CAST(COUNT(id) as CHAR) FROM Group_Member WHERE groupId = gm.groupId) as totalGroupMember, glog.id as lastMsg_Id, glog.fromId as lastMsg_FromId, glog.fromName as lastMsg_FromName, glog.fromEmail as lastMsg_FromEmail, glog.fromImage as lastMsg_fromImage, glog.toId as lastMsg_ToId, glog.toName as lastMsg_ToName, glog.toEmail as lastMsg_ToEmail, REPLACE (REPLACE (glog.content,'#@from#',glog.fromName),'#@to#',glog.toName) as lastMsg_Content,glog.type as lastMsg_Type, glog.msgType as lastMsg_MsgType, glog.createdAt as lastMsg_CreatedAt FROM Group_Member gm LEFT JOIN \`Group\` g ON g.id = gm.groupId LEFT JOIN Uploads upl ON upl.id = g.iconId LEFT JOIN (SELECT gl.groupId, gl.id, gl.fromId, gl.toId, gl.content, gl.type, gl.msgType, gl.createdAt, u1.name as fromName, u1.email as fromEmail, CONCAT('${urlPrefix}',uplInner.path) as fromImage, u2.name as toName, u2.email as toEmail FROM Group_Logs gl LEFT JOIN User u1 ON u1.id = gl.fromId LEFT JOIN User u2 ON u2.id = gl.toId LEFT JOIN Uploads uplInner ON uplInner.id = u1.imageId WHERE gl.isDeleted = 0 AND gl.id IN (SELECT MAX(id) FROM Group_Logs WHERE isDeleted = 0 GROUP BY groupId)) glog ON glog.groupId = gm.groupId WHERE gm.userId = ${apiUser.id} AND g.isDeleted = 0 ORDER BY glog.createdAt DESC`;
 
     let groupData = await this.groupMember.raw(rawQuery);
 
